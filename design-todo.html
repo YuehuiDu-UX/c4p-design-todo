@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design To-Do — Yuehui</title>
+<style>
+  :root{
+    --primary:#266ef1; --secondary:#6e5bcd; --sky:#4ed2ff;
+    --success:#10b981; --error:#ef4444; --warning:#f59e0b;
+    --text-primary:#12141a; --text-secondary:#5b6472; --text-tertiary:#8b95a5;
+    --surface:#ffffff; --surface-sunken:#f5f7fa; --surface-raised:#ffffff;
+    --border:#e4e8ee; --border-strong:#cfd6e0;
+    --r-s:8px; --r-m:12px; --r-l:16px; --r-xl:20px;
+    --sp-2xs:4px; --sp-xs:8px; --sp-s:12px; --sp-m:16px; --sp-l:24px; --sp-xl:32px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --text-primary:#f2f4f8; --text-secondary:#a4aebd; --text-tertiary:#7a8493;
+      --surface:#14171d; --surface-sunken:#0e1116; --surface-raised:#1b1f27;
+      --border:#272d38; --border-strong:#39414f;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Euclid Circular A","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--surface-sunken); color:var(--text-primary);
+    font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:var(--sp-xl) var(--sp-m) 96px}
+
+  /* ---- header ---- */
+  header{margin-bottom:var(--sp-l)}
+  h1{font-size:26px;font-weight:600;letter-spacing:-0.02em;margin:0 0 6px}
+  .sub{color:var(--text-secondary);font-size:13.5px;margin:0}
+  .sub code{background:var(--surface-raised);border:1px solid var(--border);border-radius:6px;padding:1px 5px;font-size:12px}
+
+  /* ---- legend ---- */
+  .legend{
+    background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--r-l);
+    padding:var(--sp-m);margin:var(--sp-l) 0;
+  }
+  .legend h2{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-tertiary);
+    font-weight:600;margin:0 0 var(--sp-s)}
+  .legend ul{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-xs);
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .legend li{display:flex;align-items:center;gap:var(--sp-xs);font-size:13px;color:var(--text-secondary)}
+  .legend .pill{flex:none}
+
+  /* ---- filter bar ---- */
+  .bar{display:flex;flex-wrap:wrap;gap:var(--sp-xs);align-items:center;
+    position:sticky;top:0;z-index:5;padding:var(--sp-s) 0 var(--sp-s);
+    background:var(--surface-sunken);
+    box-shadow:0 10px 10px -10px rgba(10,14,20,.14), 0 -20px 0 20px var(--surface-sunken);
+    margin-bottom:var(--sp-xs)}
+  .chip{
+    appearance:none;border:1px solid var(--border-strong);background:var(--surface-raised);
+    color:var(--text-secondary);font:inherit;font-size:13px;font-weight:500;
+    padding:6px 12px;border-radius:999px;cursor:pointer;transition:.15s;
+  }
+  .chip:hover{border-color:var(--primary);color:var(--primary)}
+  .chip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+  .chip .n{opacity:.65;font-variant-numeric:tabular-nums;margin-left:4px}
+  .bar .spacer{flex:1}
+  .btn{
+    border:1px solid var(--border-strong);background:var(--surface-raised);color:var(--text-primary);
+    font:inherit;font-size:13px;font-weight:500;padding:7px 14px;border-radius:var(--r-s);
+    cursor:pointer;transition:.15s;
+  }
+  .btn:hover{border-color:var(--primary);color:var(--primary)}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.primary:hover{filter:brightness(1.08);color:#fff}
+
+  /* ---- sections ---- */
+  section{
+    background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--r-l);
+    margin-bottom:var(--sp-m);overflow:hidden;
+  }
+  section.empty{display:none}
+  .sec-head{
+    display:flex;align-items:center;gap:var(--sp-xs);
+    padding:var(--sp-s) var(--sp-m);border-bottom:1px solid var(--border);
+    background:var(--surface);
+  }
+  .sec-head h2{font-size:14px;font-weight:600;margin:0;letter-spacing:-0.01em}
+  .sec-head .count{font-size:12px;color:var(--text-tertiary);font-variant-numeric:tabular-nums}
+  .accent{width:3px;height:15px;border-radius:2px;background:var(--primary);flex:none}
+
+  /* ---- rows ---- */
+  .rows{padding:var(--sp-2xs) 0}
+  .item + .item > .row{border-top:1px solid var(--border)}
+  .item.hidden{display:none}
+  .row{display:flex;align-items:flex-start;gap:var(--sp-s);padding:10px var(--sp-m)}
+  .item.child > .row{padding-left:44px;background:linear-gradient(90deg,var(--surface-sunken) 0 3px,transparent 3px)}
+  .item.child .txt{font-size:14px;color:var(--text-secondary)}
+
+  /* ---- ghost (parallel) task ---- */
+  .item.ghost > .row{
+    padding-left:44px;background:transparent;
+    border-left:2px dashed var(--secondary);margin-left:22px;
+  }
+  .item.ghost > .row{padding-left:22px}
+  .item.ghost .dbody{margin-left:72px;border-left-style:dashed;border-left-color:var(--secondary)}
+  .par{
+    display:inline-flex;align-items:center;gap:4px;margin-right:7px;vertical-align:1px;
+    font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--secondary);background:#eeeafc;border:1px dashed #c9befb;
+    border-radius:999px;padding:1px 7px;
+  }
+  @media (prefers-color-scheme: dark){
+    .par{background:#211d3d;border-color:#3d3470;color:#b3a5f0}
+  }
+  .item.is-done .txt{text-decoration:line-through;color:var(--text-tertiary)}
+  .item.muted .txt{opacity:.55}
+
+  /* ---- collapsible detail ---- */
+  .caret{
+    appearance:none;border:0;background:transparent;color:var(--text-tertiary);
+    width:26px;height:26px;flex:none;border-radius:6px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.15s;padding:0;
+  }
+  .caret:hover{background:var(--surface-sunken);color:var(--primary)}
+  .caret:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+  .caret svg{transition:transform .2s ease}
+  .item.open .caret{color:var(--primary)}
+  .item.open .caret svg{transform:rotate(90deg)}
+  .txt{cursor:pointer}
+
+  .detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s ease}
+  .item.open .detail{grid-template-rows:1fr}
+  .clip{overflow:hidden}
+  .dbody{
+    margin:0 var(--sp-m) 14px 44px;padding:var(--sp-s) var(--sp-m);
+    border-left:2px solid var(--border-strong);border-radius:0 var(--r-s) var(--r-s) 0;
+    background:var(--surface-sunken);
+    font-size:13.5px;line-height:1.62;color:var(--text-secondary);
+  }
+  .item.child .dbody{margin-left:72px}
+  .dbody p{margin:0 0 8px}
+  .dbody p:last-child{margin-bottom:0}
+  .dbody ul{margin:0 0 8px;padding-left:18px}
+  .dbody li{margin-bottom:4px}
+  .dbody b{color:var(--text-primary);font-weight:600}
+  .dbody i{color:var(--text-primary);font-style:italic}
+  .dbody code{
+    background:var(--surface-raised);border:1px solid var(--border);border-radius:5px;
+    padding:0 4px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .dbody .files{
+    font-size:12px;color:var(--text-tertiary);margin-top:10px;padding-top:8px;
+    border-top:1px dashed var(--border);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+
+  input[type=checkbox]{
+    appearance:none;flex:none;width:18px;height:18px;margin:3px 0 0;
+    border:1.5px solid var(--border-strong);border-radius:5px;background:var(--surface-raised);
+    cursor:pointer;position:relative;transition:.15s;
+  }
+  input[type=checkbox]:hover{border-color:var(--success)}
+  input[type=checkbox]:checked{background:var(--success);border-color:var(--success)}
+  input[type=checkbox]:checked::after{
+    content:"";position:absolute;left:5px;top:1.5px;width:5px;height:10px;
+    border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg);
+  }
+  input[type=checkbox]:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+  .body{flex:1;min-width:0}
+  .txt{display:block}
+  .txt .arrow{color:var(--text-tertiary)}
+  .tag{
+    display:inline-block;margin-left:6px;font-size:11px;font-weight:500;
+    color:var(--text-tertiary);background:var(--surface-sunken);
+    border:1px solid var(--border);border-radius:5px;padding:0 5px;
+    vertical-align:1px;font-variant-numeric:tabular-nums;
+  }
+  .note{display:block;font-size:12px;color:var(--text-tertiary);margin-top:3px}
+
+  /* ---- status pill / select ---- */
+  .status{position:relative;flex:none;margin-top:1px}
+  .status select{
+    appearance:none;font:inherit;font-size:12px;font-weight:600;
+    padding:4px 22px 4px 10px;border-radius:999px;cursor:pointer;
+    border:1px solid transparent;transition:.15s;min-width:88px;
+  }
+  .status::after{
+    content:"";position:absolute;right:9px;top:50%;margin-top:-2px;pointer-events:none;
+    border:solid currentColor;border-width:0 1.4px 1.4px 0;padding:2px;
+    transform:rotate(45deg);opacity:.5;
+  }
+  .status{color:var(--text-secondary)}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+  .s-open   {background:#eef1f6;color:#5b6472;border-color:#dfe4ec!important}
+  .s-next   {background:#e8f0fe;color:#1b56c4;border-color:#c9dcfc!important}
+  .s-doing  {background:#eeeafc;color:#5546b0;border-color:#dad2f7!important}
+  .s-pause  {background:#fdf2dd;color:#96620a;border-color:#f7e2b6!important}
+  .s-blocked{background:#fdeaea;color:#b52d2d;border-color:#f7c9c9!important}
+  .s-dropped{background:transparent;color:var(--text-tertiary);border-color:var(--border)!important;text-decoration:line-through}
+  .s-done   {background:#e3f6ee;color:#0a7a58;border-color:#c2ecdd!important}
+  @media (prefers-color-scheme: dark){
+    .s-open{background:#1f2530;color:#a4aebd;border-color:#2c3441!important}
+    .s-next{background:#152645;color:#8fb6f8;border-color:#223a63!important}
+    .s-doing{background:#211d3d;color:#b3a5f0;border-color:#332c5c!important}
+    .s-pause{background:#33260e;color:#e8b563;border-color:#4a3818!important}
+    .s-blocked{background:#331717;color:#f09a9a;border-color:#4a2020!important}
+    .s-done{background:#123025;color:#63d3ac;border-color:#1c4536!important}
+  }
+
+  /* ---- export ---- */
+  dialog{
+    border:1px solid var(--border);border-radius:var(--r-l);padding:0;max-width:760px;width:92vw;
+    background:var(--surface-raised);color:var(--text-primary);
+  }
+  dialog::backdrop{background:rgba(10,14,20,.5)}
+  .dlg-head{display:flex;align-items:center;gap:var(--sp-xs);padding:var(--sp-m);border-bottom:1px solid var(--border)}
+  .dlg-head h2{font-size:15px;font-weight:600;margin:0;flex:1}
+  dialog textarea{
+    width:100%;height:52vh;border:0;padding:var(--sp-m);font-size:12.5px;line-height:1.6;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;resize:none;
+    background:var(--surface-raised);color:var(--text-primary);
+  }
+  dialog textarea:focus{outline:0}
+  .dlg-foot{display:flex;gap:var(--sp-xs);justify-content:flex-end;padding:var(--sp-s) var(--sp-m);
+    border-top:1px solid var(--border);align-items:center}
+  .dlg-foot .hint{flex:1;font-size:12px;color:var(--text-tertiary)}
+  footer{margin-top:var(--sp-l);font-size:12px;color:var(--text-tertiary);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Design To-Do</h1>
+  <p class="sub"><b>9/8 done — Greg did not sign off on the plan.</b> He withheld it for one reason: the provider-facing snapshot. Second review agreed, undated, Kelly to schedule. Jay's two-week build starts at sign-off, so the revision is the critical path. Greg also wants the reports tab first because the pilots need it. Open questions that blocked me: <code>Design-Questions-2026-09-08.md</code>.</p>
+  <p class="sub" style="margin-top:6px">Rolling. <code>Design-TODO.md</code> is still the source of truth &mdash; this is the view. Set a status, tick what's done, then <strong>Copy as markdown</strong> and hand it back to me to save. Open the arrow on any line for the detail behind it.</p>
+</header>
+
+<div class="legend">
+  <h2>Status options</h2>
+  <ul>
+    <li><span class="pill s-open">Open</span> logged, not started</li>
+    <li><span class="pill s-next">Next</span> up next, this week</li>
+    <li><span class="pill s-doing">Doing</span> actively designing it</li>
+    <li><span class="pill s-pause">Pause</span> not the priority for now</li>
+    <li><span class="pill s-blocked">Blocked</span> waiting on someone else</li>
+    <li><span class="pill s-dropped">Dropped</span> decided not to do it</li>
+    <li><span class="pill s-done">Done</span> the checkbox &mdash; overrides the status</li>
+  </ul>
+</div>
+
+<div class="bar" id="bar"></div>
+<main id="list"></main>
+
+<footer>
+  <b>Sub-tasks</b> sit under their parent and ride along: pausing, blocking or dropping the parent dims them.
+  A <b>ghost task</b> (<span class="par" style="vertical-align:0">&#8674; parallel</span>) runs alongside instead &mdash; it keeps its own status and doesn't dim when the parent stalls.<br>
+  Checkbox state lives in this page only, so it resets on reload. Copy the markdown out before you close it.
+</footer>
+
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-head">
+    <h2>Markdown</h2>
+    <button class="btn" onclick="dlg.close()">Close</button>
+  </div>
+  <textarea id="md" spellcheck="false" readonly></textarea>
+  <div class="dlg-foot">
+    <span class="hint">Paste this back into Design-TODO.md, or drop it in chat and I'll save it.</span>
+    <button class="btn primary" id="copyBtn">Copy</button>
+  </div>
+</dialog>
+
+<script>
+const STATUS = {
+  open:   {label:'Open',    marker:null},
+  next:   {label:'Next',    marker:'Next'},
+  doing:  {label:'Doing',   marker:'Doing'},
+  pause:  {label:'Pause',   marker:'Pause'},
+  blocked:{label:'Blocked', marker:'Blocked'},
+  dropped:{label:'Dropped', marker:'Dropped'}
+};
+const RIDE_ALONG = ['pause','blocked','dropped'];
+
+const DATA = [
+  {title:'Caregiver — Patient App', accent:'var(--primary)', src:'Meeting Fri 2026-08-07. The live block right now.', items:[
+    {t:'Redesign the care recipient view -> not just allergies / meds / conditions / procedures', d:'8/7', s:'open', x:`
+      <p>Today the caregiver's view of a care recipient is four clinical lists: allergies, medications, conditions, procedures. That's a record, not a dashboard. It says what was documented, not how the person is doing.</p>
+      <p><b>Target:</b> a view that answers <i>"how is Mom this week"</i> before it answers <i>"what is Mom's problem list."</i></p>`},
+    {t:'Add: recent wellness (steps, goals met), labs / vitals + high-level evaluation, ask Orion about their data', d:'8/7', s:'open', x:`
+      <p>Three additions, rough priority order:</p>
+      <ul>
+        <li><b>Recent wellness</b> — steps, goals met, daily-tracker signals. Cheap to read, high reassurance, the thing a caregiver checks daily rather than monthly.</li>
+        <li><b>Labs / vitals + high-level evaluation</b> — not the raw full-data table. Reuse the vitality / evaluation summary layer that already exists on the patient and provider side.</li>
+        <li><b>Ask Orion about the care recipient's data</b> — parity with the provider view's Orion.</li>
+      </ul>
+      <p><b>Open question:</b> does caregiver-Orion answer in the same voice and with the same source-trace / grounding chips as patient-Orion? Decisions that already apply: Orion speaks in first person ("I"), and suggested follow-up chips <i>fill</i> the input rather than send.</p>
+      <p class="files">orion-source-chip-spec.html · orion-grounding-groups-expanded.html · orion-peek-summary-copy.html</p>`},
+    {t:'Keep it a minimal caregiver dashboard, still inside the patient app', d:'8/7', s:'open', x:`
+      <p>Scope guard from the meeting. No separate caregiver app, no new tab structure — it lives in the existing patient app (4 tabs + center Orion button). The phrase used was <i>"minimal but meaningful."</i></p>`},
+    {t:'Caregiver with multiple family members -> Network tab as the entry point', d:'8/7', s:'open', x:`
+      <p>A caregiver may manage several people: two kids, a parent, a spouse. The proposal on the table is that the <b>Network tab</b> lists all care recipients and is where you pick whose data to look at.</p>
+      <p>Worth checking against the existing health network / connections work so this doesn't invent a second concept of "people I'm connected to."</p>
+      <p class="files">patient-connections-screen.html · connect-combined-flow.html</p>`},
+    {t:'Nav model: caregiver’s own profile -> care recipient -> back', d:'8/7', s:'open', x:`
+      <p>Define the round trip: how you get in, how you know you're in, how you get out. The middle one is its own line below (always show whose data is on screen).</p>`},
+    {t:'Quick view vs. log in as that user -> define the UX expectation, engineering decides the tech', d:'8/7', s:'open', x:`
+      <p>Concept level only. Two experiences to name and bound:</p>
+      <ul>
+        <li><b>Quick view</b> — read the care recipient's information without impersonating their account. Probably the default for the caregiver dashboard.</li>
+        <li><b>Full login-as</b> — actually operating as that user. Needed for some actions (logging a dose for a child?), but heavier and riskier.</li>
+      </ul>
+      <p>Your job is when each is appropriate and what the user should expect; engineering picks the technical approach. Two constraints stated in the meeting: keep it simple for a parent managing children and an adult child managing an older parent, and make it unambiguous whose data is on screen.</p>`},
+    {t:'Always show whose data is on screen', d:'8/7', s:'open', x:`
+      <p>Persistent, not a one-time confirmation. This is the safety rail for the whole caregiver model. The failure mode to design out: a caregiver logging a med against the wrong person.</p>`},
+    {t:'Future caregiver-specific app / dashboard -> note the idea, don’t design it now', d:'8/7', s:'pause', x:`
+      <p>Explicitly parked in the meeting. Capture the thinking so it isn't lost; current focus stays on the in-patient-app caregiver view.</p>`},
+    {t:'Leave room for messaging -> where the caregiver would see threads with provider / patient later', d:'8/7', s:'open', x:`
+      <p>Anticipatory only. Don't design the messaging UI. Just don't build a caregiver layout that has nowhere to put a thread list later.</p>`},
+    {t:'Finish the pop-ups and the screen content -> the framework is already there', d:'8/25', s:'doing', x:`
+      <p>Your words in the review: <i>"it is still like work in progress… a lot of I think little pop-ups, the screen content I need to figure out, but the framework is already there."</i></p>
+      <p>The skeleton is settled — network screen, connected-person dashboard, access management. What is missing is the content layer.</p>`},
+    {t:'Connect People grouping -> highlight group is the people who share with me, separate section for the people I share with', d:'8/25', s:'next', x:`
+      <p>You brought in (a) people you share with in either direction and (b) "connected only". Kelly rejected the mixed group.</p>
+      <p><b>Decision:</b> the primary group is the people whose data you can see, because that is why you come to this screen — <i>"the primary function of coming to this screen is that I want to go look at dad's something or another… when's Dad's appointment… did Dad get a good night's sleep?"</i></p>
+      <p>Your objection stands and is why the sub-tasks exist: most real relationships are bidirectional. <i>"it cannot clearly just lead two groups… most of time probably is mixed together."</i> Mental model referenced throughout: a social-media friends list.</p>`, kids:[
+      {t:'Icon or colour code for the both-ways relationships instead of a third group', d:'8/25', s:'open', x:`
+        <p>Kelly's fix rather than a third group: <i>"maybe there's a little icon or color code that indicates they also can see you, and then there's a section for shared with."</i></p>`},
+      {t:'Replace "connected only" with a deactivated / no-longer-sharing section that can be reactivated', d:'8/25', s:'open', x:`
+        <p>Jayanth twice said he could not find a use case for "connected only". Your case was keeping Dad in the network after both sides revoked.</p>
+        <p>Kelly reframed it: <i>"maybe there's a deactivated section instead of connected only, so it shows that you can reactivate it versus you've deleted them completely from your network."</i> Your framing to preserve: <i>"between sharing data and remove from a list, there's some middle point in between."</i></p>`},
+      {t:'Decide the default count on the network screen -> 4 now, slider or full list when there are more', d:'8/25', s:'open', x:`
+        <p>Four is a placeholder. Open: slider versus full list once there are more than four connections.</p>`}
+    ]},
+    {t:'Source tiles -> we don’t get logos from the health systems, today it’s the letter avatar', d:'8/25', s:'open', x:`
+      <p>You wanted compact preview rows with a logo per source. Jayanth confirmed the gap: <i>"The app has the logo… We don't get the logo."</i> Today the app falls back to the initial letter as the avatar.</p>
+      <p>Open design problem: keep the row compact and still identifiable without a brand mark.</p>`},
+    {t:'Show health systems the same way as people -> Jay says they get revisited often, not set-and-forget', d:'8/25', s:'open', x:`
+      <p>Your assumption was that sources are set-and-forget. Jayanth pushed back: <i>"they will probably check the health systems frequently… maybe want to think about showing the health systems the same way you're showing the people."</i></p>
+      <p>That is a structural change to the network screen, not a styling note. Cross-ref the auto-refresh block.</p>`},
+    {t:'Connected person dashboard -> decide whether their connected sources show at all', d:'8/25', s:'open', x:`
+      <p>Your open product question: <i>"can caregiver see or even edit their connect sources? Like, if not, probably we don't need to show this section."</i> It resolves into the act-as-me scope — if a caregiver cannot manage Dad's connections, the section is dead weight.</p>
+      <p><b>The dashboard as presented:</b> visit essentials · add data · access management · notification placeholder · vitality board · Orion summary · a flexible grid of small cards (meds today; sleep, activity, nutrition coming) · Health Hub with upcoming appointments, active conditions, active meds and allergies, everything else clubbed into "more records".</p>`},
+    {t:'Action-oriented view -> what does Dad need to do today and how do I help, not just what can I see', d:'8/25', s:'next', x:`
+      <p>Kelly's reframe of the whole dashboard, and the most consequential open note in the block:</p>
+      <p><i>"if I'm Dad's caregiver, my priority is probably not reviewing all of his stuff. It's I want a summary of what actions are needed, what his treatment plan is, what the schedules, the appointments, what conditions he needs monitored… rather than just access, it's really more of what does Dad need to do, and how do I help him make that happen? So maybe we can brainstorm about what those actions are and put that in the story too."</i></p>
+      <p>Your related distinction: visit essentials is a <i>before the visit</i> surface; the dashboard should be a <i>daily</i> one — <i>"did your dad feel good, all good today, or is there any actions need to do today or recently?"</i></p>
+      <p>Deferred: stats on who viewed your account and how often. Today you can see what you share, not how often it is read.</p>`},
+    {t:'Health Hub category detail list -> better looking item / field card', d:'8/25', s:'open', x:`
+      <p>Your own item: <i>"for the items color field card, I'm thinking about is there any better looking way to do that… I don't think that will require a lot of effort."</i> Small, cheap, self-assigned.</p>`},
+    {t:'Show Greg the caregiver UI and flows next Tuesday', d:'8/25', s:'next', x:`
+      <p>Confirmed twice in the review. You deliberately did not show it in the 8/25 team meeting — Kelly: <i>"you're not going to show the Caregiver's stuff today to Greg, you want some time to update, and then we'll plan on showing him more details next week."</i></p>
+      <p>Kelly told Greg the caregiver work is ready for review and that a treatment-plan first pass lands the same day. Greg's sign-off is what unblocks dev.</p>`},
+    {t:'Practitioner list is cluttered with nurses -> separate primary care from all practitioners, maybe a filter', d:'9/1', s:'next', x:`
+      <p>Greg's own hospital stay: <i>"when I went to the hospital, I had a doctor, but then it's showing 20 other people that were involved that were nurses, and it just makes it untenable to figure out who's who."</i> His instinct: <i>"we should only capture the doctors, not all the nurses."</i></p>
+      <p>Kelly's correction is the design problem: the app already separates the two. Health systems lists primary care only, All practitioners lists everyone the connection returned. Greg was not seeing that separation. Her fix, which he accepted: <i>"maybe at the top there's just a filter for all practitioners versus primary care."</i></p>
+      <p>So the task is not to drop nurses. It is to make the existing split visible at a glance.</p>`},
+    {t:'Restore the "whose records am I viewing" banner + an exit / back to my account control', d:'8/31', s:'next', x:`
+      <p>A regression rather than a new idea: the persistent whose-data banner from the earlier caregiver work went missing in the redesign. Restore it, paired with an explicit exit or back-to-my-account control.</p>
+      <p>This is the safety rail for the whole caregiver model, so it should not be the thing that gets dropped when the layout gets tight. You did demo it to Greg on 9/1, so check whether the gap is only in some frames.</p>`},
+    {t:'"Last update" with the date instead of a status -> two states, not a spectrum', d:'8/31', s:'next', x:`
+      <p>Replace the status wording on caregiver connection cards with "Last update" plus the date. Show red <b>only</b> when an appointment happened after the last refresh, meaning there is data you do not have yet. Gray otherwise.</p>`}
+  ]},
+  {title:'Caregiver — Access & Sharing', accent:'var(--primary)', src:'Caregiver design review Mon 2026-08-25. Its own permission model, premium gating and consent problem.', items:[
+    {t:'Two grants, two buttons -> view only, and act as me', d:'8/25', s:'next', x:`
+      <p>Kelly's structure: <i>"there's like a separate button. So give them access to all this and another button that says they can act on my behalf in my account."</i></p>
+      <p>What act-as-me covers: <i>"They can connect health systems. They can add medications or supplements, they can add, upload data. They can schedule appointments if that's a feature."</i></p>
+      <p>Base-vs-premium content rules Jayanth stated, one contested: no Orion insights, no summaries, no treatment plan for base. Kelly pushed back on past-visit summary being excluded and it was left unresolved. Without act-as-me a caregiver can only change the status of conditions and meds, and log meds.</p>`, kids:[
+      {t:'v1 is UI only, no Orion -> add meds goes through Orion today so it can’t be first phase', d:'8/25', s:'open', x:`
+        <p>Jayanth: <i>"the simpler part would be is to just give them the UI and not access Orion… they can do the refresh connection, but it's only through UI, not through Orion."</i></p>
+        <p>The blocker you named: add-meds runs through Orion today, so that action cannot be in the first phase.</p>`},
+      {t:'Premium on both sides -> mark the feature blocked / inactive when the other person is base', d:'8/25', s:'open', x:`
+        <p>Both the caregiver and the person being cared for must be premium — Kelly: <i>"they both have to have a premium to do the act as me at whichever way it goes."</i></p>
+        <p>Design consequence you already flagged: when the counterpart is base, the feature shows blocked or inactive with a premium mark. A family plan (Kelly floated roughly $9.99/mo for three) is going to Greg — pricing is not yours, but the upgrade prompt is.</p>`},
+      {t:'Pick the one-to-three actions dev can actually ship first, expand from there', d:'8/25', s:'open', x:`
+        <p>Kelly: <i>"whatever the initial phase or second phase is that says, well, if you're acting as someone, here's the one to three things that from a dev standpoint we could make happen, and then we could always expand it from there."</i></p>`}
+    ]},
+    {t:'Locked categories -> the receiver can only request more, never less', d:'8/25', s:'open', x:`
+      <p>The control rule, from Jayanth: <i>"whoever is sharing should have the capital D to share… B should not even have access to share."</i> Your UI expression of it: <i>"dad grant the conditions, meds and allergy to me, so I cannot uncheck them. This is locked. I can only request more."</i></p>
+      <p>"Show less to me" was considered and dropped — Kelly saw no reason to refuse data. No expiry in v1: access is permanent until revoked, and the QR code and PDF stay the one-time snapshot mechanisms.</p>
+      <p><b>Two management entry points, both designed:</b> "the data I receive from my dad" (locked categories, request more) and "manage the data I share with my dad" (applies immediately, no approval loop — grant more, switch view-only to act-as-me, grant fewer, or stop entirely).</p>`, kids:[
+      {t:'Templated request note, not free text', d:'8/25', s:'open', x:`
+        <p>Kelly: <i>"It's a templated note, not a note that they can put in… if users say I want to add a note, we could talk about it later."</i></p>`},
+      {t:'Request tracker -> sent on a date, can be withdrawn', d:'8/25', s:'open', x:`
+        <p>Already designed: <i>"your request is sent on specific date, and you can choose to withdraw."</i></p>`},
+      {t:'Granted state -> "act as" or "view only" as of a date', d:'8/25', s:'open', x:`
+        <p>Kelly wants it legible on the row: <i>"granted access — act as, or view only — as of certain date."</i></p>`}
+    ]},
+    {t:'Build the sharer’s screen for an incoming request -> that’s the screen I’m missing', d:'8/25', s:'next', x:`
+      <p>Verbatim gap you called out: <i>"I didn't have the dad's screen. That's the screen I'm missing."</i></p>
+      <p>The request flow is designed from the requester's side only. What Dad sees when a request arrives — notification, review, grant or decline — does not exist yet.</p>`},
+    {t:'Mode indicator -> pop-up when a view-only user hits add / edit, persistent banner in act-as-me', d:'8/25', s:'open', x:`
+      <p><b>View only</b> hitting an edit or add gets a pop-up ("view only, cannot add any records") with a path to request act-as-me from the sharer.</p>
+      <p><b>Act as me</b> gets a small persistent banner on every screen — Orion, manual add records, add meds, data cleansing, Vitality, meds and supplement goal logging. On the connected person's Vitality screen the banner carries no exit button: <i>"it's meaningless to have the access button, so it just indicates that you're in your dad's health records right now."</i></p>
+      <p>This is the 8/7 "always show whose data is on screen" line, now with a concrete pattern.</p>`},
+    {t:'Define when the caregiver can exit caregiver mode and when they can’t -> need Jay on the backend', d:'8/25', s:'blocked', x:`
+      <p>Your working hypothesis: no exit from data cleansing (you are mid-flow in Dad's records), but yes from the Orion chat, switching cleanly back to your own profile. <i>"I'm not sure from Jay your backend how easy or how hard it is."</i></p>
+      <p>Related behaviour already designed: opening Orion from caregiver mode switches back to your own profile and shows a toast saying so.</p>`},
+    {t:'Orion’s perspective in caregiver mode -> "his meds" not "your meds"', d:'8/25', s:'pause', x:`
+      <p>Your framing: <i>"if you are in your dad's health records but Orion says your meds are staying on track, it doesn't make any sense."</i> Jayanth thought the banner might carry enough context. Agreed to revisit — <i>"let's think about the first priority."</i></p>`},
+    {t:'Share my health data selector -> subtitle under every category, no hover on mobile', d:'8/25', s:'next', x:`
+      <p>The problem Kelly stated: <i>"right now I can't say don't show Dad I take lithium. It would be medications all or none, right? Mental health, substance abuse… We just need a way to give a disclaimer of sorts, like this includes sensitive data."</i></p>
+      <p>Sharing is per category, all-or-none within a category — there is no item-level suppression, and there will not be in v1. Your resolved strategy: <i>"my strategy will be the subtitle, and maybe highlight with some icon like this one might include some sensitive information."</i> Hover was ruled out — <i>"on the mobile you cannot have hovers."</i></p>
+      <p><b>Asymmetry to surface, not hide:</b> for act-as-me every category is checked by default and cannot be de-selected, because add-records writes across all categories.</p>`, kids:[
+      {t:'Icon on the categories that may include sensitive information', d:'8/25', s:'open', x:`
+        <p>Mental health, substance abuse history, STD history. Category-level flag, since suppression is not possible below that.</p>`},
+      {t:'Default everything on + a Select All button', d:'8/25', s:'open', x:`
+        <p>Kelly, relaying Dr. Portu: <i>"every time I go through a demo, I have to select each one of those separately, and we want to default all of them on and get a select all button."</i></p>`},
+      {t:'Disclaimer at the top or bottom of the screen', d:'8/25', s:'open', x:`
+        <p>Kelly: <i>"maybe a disclaimer at the bottom or at the top where it says share my health data… that will alert the user they're sharing all their information within the category selected. That may include sensitive information, or it's their decision."</i></p>`}
+    ]},
+    {t:'Research the consent wording -> what do EMR patient portals use when you add a caregiver', d:'8/25', s:'next', x:`
+      <p>Assigned in the meeting, Kelly offering help. Her framing: <i>"it's not really a HIPAA thing, right? Because we're not a covered entity. But I wonder what — maybe we can look into what the EMRs, the patient portals, do when you add a caregiver to that portal. What kind of disclaimer do they use?"</i></p>
+      <p>And: <i>"there's got to be something the patient is clearly consenting to to give their son or caregiver full access to all of their health data."</i> Deliverable is wording, shared back with the team.</p>`},
+    {t:'Notification design -> every change / daily summary / weekly summary, and per-person on-off', d:'8/25', s:'open', x:`
+      <p>Your concept, to bring to the finalized version. Three grains of "tell me when the caregiver does something", plus Kelly's addition that the receiver needs per-person on-off too. Two directions:</p>
+      <ul>
+        <li><b>Sharer to receiver</b> — Dad shared more information. Kelly wants it in today's to-dos and as a push, <i>"so I don't have to log in to know Dad shared with me."</i></li>
+        <li><b>Caregiver to sharer</b> — whenever the caregiver adds or edits a record, the account owner is told.</li>
+      </ul>
+      <p>Future, noted not designed: new-data notifications from partner connections (labs are in, Dad has a new appointment).</p>`, kids:[
+      {t:'Practices ask for SMS -> phone notification first, direct text sits in future messaging', d:'9/4', s:'open', x:`
+        <p>Daphne, on invites: <i>"Is there a way to receive it through text message?"</i> and <i>"a lot of times, text is usually the preferred method of communication with patients."</i> Jayanth: <i>"Not now, but in the future, maybe."</i></p>
+        <p>Kelly routed it to work already assigned to you: <i>"That'll be in our messaging feature updates… Yuehui is also working on the design for notifications that would come on your phone. So it's not a direct text, but it's a notification that you have to approve access to your account."</i></p>
+        <p>So: no SMS design now. But the push design above is the answer being given to practices, which raises its bar — one of its jobs is the access-approval notification.</p>`}
+    ]},
+    {t:'Standardize every consent / data-sharing list across provider, patient, network, QR and FHIR', d:'8/31', s:'next', x:`
+      <p>The same list currently appears in five flows with five different sets of categories. One canonical list, used everywhere: provider access, patient sharing, network connections, the QR code flow, the FHIR consent screen.</p>
+      <p>Three requirements: <b>include uploaded documents and wellness data</b> — Kelly: <i>"if wellness data is already included in vitality and goals, that's fine, but we need to be specific that the user is consenting and the provider is requesting wellness data"</i> — provide <b>Select All</b>, and <b>default every category to on</b>.</p>
+      <p>This overlaps the Select All sub-line under the share selector. Same rule, wider scope: every consent surface, not just that screen.</p>`},
+    {t:'HL7 / FHIR observation categories to our user-facing categories -> build the crosswalk and share it', d:'8/31', s:'next', x:`
+      <p>Your action item from 8/31: a crosswalk from HL7 / FHIR observation categories to the user-facing health data categories, shared with Kelly and Jay.</p>
+      <p>Start from the LOINC category mapping already in the folder — the seven real categories and the defects logged against the source file — rather than from the spec.</p>`},
+    {t:"Jay's interim permissions rework is a placeholder for my sharing / caregiver design -> Provider Access renamed and moved top-level, new Manage Sharing entry, patient + care team default on and not optional", d:'9/4', s:'open', x:`
+      <p>Jayanth shipped a permissions restructure to stage on 9/4 and called it a stand-in for your work twice, unprompted: <i>"This kind of ties into what UHe is doing also, but not exactly"</i> and <i>"This all ties into UH updates around sharing and caregiver in the future. But initially I went with a simpler version for now to prep this for CareCloud users."</i></p>
+      <ul>
+        <li><b>"Provider Consent Request" is now "Provider Access"</b>, moved out of Employee Services to the top level. His words: <i>"Provider consent request didn't make sense. We'll obviously change this in the future with caregiver with UH update."</i></li>
+        <li><b>A new "Manage Sharing" entry</b> sits next to it.</li>
+        <li><b>Patient + care team permissions are default-on and non-optional</b>, and the list was trimmed to what the provider can actually see.</li>
+      </ul>
+      <p>All provisional. The rename especially is his placeholder, not a naming decision.</p>`, kids:[
+      {t:"Select all / deselect all comes with my caregiver UI update -> he toggled everything on for now", d:'9/4', s:'open', x:`
+        <p>Confirms the 8/25 line rather than adding to it. Kelly: <i>"can we still get a select all button? So select or deselect all."</i> Jayanth: <i>"with the caregiver UI updates, I'll bring those in. But for now, I think I toggled them all on so that we don't have to."</i> Kelly: <i>"Good for now."</i></p>
+        <p>So the Select All affordance is formally on your side of the line, not his.</p>`},
+      {t:"New patient-facing header \"Used by Orion Answers Only\" -> diagnostic reports, health system and uploaded documents, care plans, health kits", d:'9/4', s:'open', x:`
+        <p>A new grouping header on the patient permission screen for everything reachable only through Orion, not through the provider dashboard. Jayanth: <i>"if you give access to care plans, it's only through Orion that they can access that information. What can you access through Orion versus what can provider actually see in the dashboard? That there is also a differentiator for that."</i></p>
+        <p>Same distinction the standardized consent list has to carry (8/31 line). Open question: does the label survive, or does the sensitivity / subtitle pattern already cover it?</p>`}
+    ]}
+  ]},
+  {title:'Data Refresh & Appointments', accent:'var(--sky)', src:'Caregiver design review Mon 2026-08-25. Scoped to both the main app and the caregiver view.', items:[
+    {t:'Auto-refresh for health systems -> design it for the main app and the caregiver view', d:'8/25', s:'next', x:`
+      <p>Kelly scoped it explicitly: <i>"if you could in the caregiver as well as for the main platform, think about what this auto refresh will look like for the health systems, because certainly we want it to be seamless for the user."</i> And the principle: <i>"it should be as seamless and easy for them, and not always the person having to remember to go in and refresh."</i></p>
+      <p>Devices and apps already refresh on their own; wellness data refreshes every time the app opens. Health systems are the hard case.</p>
+      <p><b>Caregiver propagation is decided:</b> refreshing the sharer's data automatically refreshes whatever the caregiver has access to. Jayanth's boundary — <i>"we shouldn't touch their network systems or anything like that. Not yet. It should just refresh their data."</i></p>
+      <p><b>Constraint:</b> EMR tokens expire in about an hour regardless of the year-long window the spec allows, so re-login prompts are unavoidable.</p>`, kids:[
+      {t:'Appointment is the trigger for partner systems -> after the visit, refresh and pull the new labs', d:'8/25', s:'open', x:`
+        <p>Jayanth: <i>"the real deal breaker is if they give us appointments or not because if we don't have the appointment data, then we don't know when to trigger it… The only thing that would make sense is if they had an appointment with that specific health system."</i></p>
+        <p>Kelly's worked example: visit yesterday, log in today, refresh fires, lab orders land, refresh again.</p>`},
+      {t:'Non-partner systems -> notification instead: "how was the appointment, want to refresh?"', d:'8/25', s:'open', x:`
+        <p>Kelly: <i>"if they're connected to a system that's not a partner, we want to give them a notification to refresh. If they're connected to a system that is a partner, then we want to trigger that off the appointment data."</i></p>
+        <p>Kelly is writing this as one epic with separate stories for the partner-appointment path and the non-partner notification path.</p>`},
+      {t:'Decide the entry point -> from the health system, or from the data itself', d:'8/25', s:'open', x:`
+        <p>Your open question: <i>"I'm not sure from the entry points from their health system is the best way, or from specific data or something."</i></p>`}
+    ]},
+    {t:'How do we get the user to enter appointments when the provider isn’t a partner', d:'8/25', s:'open', x:`
+      <p>Kelly put this to you directly and then parked it as a later story: <i>"Yuehui, how do we encourage the user to enter appointment information or talk about it when it's not a partner provider."</i></p>
+      <p>Widened: <i>"even if my doctor is the partner, I'm still gonna go see other specialists or therapists or labs… How are we going to one encourage those connections and then two encourage those refreshes? Like, maybe first encourage the awareness of those appointments and then connection and refreshes."</i></p>
+      <p>Adjacent epic Jayanth named but nobody owns: scheduling appointments in-app, reading the user's calendar, writing to Apple Calendar.</p>`},
+    {t:'Appointment adherence as a Care / prevention element -> annual, mammogram, colonoscopy, flu shot', d:'8/25', s:'open', x:`
+      <p>You raised it, Kelly took it enthusiastically: <i>"Absolutely, it's part of prevention, right? Did you get your annual on time? Did you get your mammogram? Did you get your Pap smear? Did you get your colonoscopy, flu shot, all that? Absolutely, Yuehui, should be in care."</i></p>
+      <p>It also flows to the provider side as part of the visit-essentials snapshot. Cross-ref the treatment plan block.</p>`},
+    {t:"Bulk invites without an appointments API -> CareCloud has none, worst case is searching patients one at a time", d:'9/4', s:'open', x:`
+      <p>The invite UI has three tabs — upcoming visits, next-two-days visits, patient search — and the first two only work where the EMR exposes appointments. The pilot EMR doesn't. Jayanth: <i>"this upcoming visits and two days visits only works if we have an appointments API. Also, unfortunately, CareCloud doesn't have it, so for them we'll have to figure out some other way to do bulk invites."</i></p>
+      <p>On the fallback: <i>"that's why we have this third tab, which is the worst case scenario… Then they can still search for their patients, which is not great. But that's the only thing I, for now, I could think of. But we'll see if there is any way they could upload a list of invites."</i></p>
+      <p>An unsolved design problem stated as an engineering one. Options on the table: a list upload, or a better search-and-batch flow. Batch cap today is roughly 20-25 patients.</p>`, kids:[
+      {t:"Kelly wants a quick daily send in the morning -> one at a time is a big dissatisfier, batch cap is 20-25", d:'9/4', s:'open', x:`
+        <p>Kelly: <i>"is there something they could do daily in the morning that's a quick, you know, link send?"</i> and why it matters: <i>"I think that'll be a big dissatisfier if they've got to do that one at a time."</i></p>
+        <p>Front-desk staff, start of day, no appointment feed to work from. That's the scenario to design against.</p>`}
+    ]},
+    {t:"Invite email says \"your healthcare provider\" -> needs the actual provider name", d:'9/4', s:'open', x:`
+      <p>Small copy fix Jayanth flagged against himself: <i>"Your healthcare provider. I guess we'll have to change this to actually include the provider name."</i> A patient who gets an invite from a nameless "healthcare provider" has no reason to trust it.</p>`}
+  ]},
+  {title:'Health Bio & Stats', accent:'var(--error)', src:'Team weekly Mon 2026-08-25, first fifteen minutes. Greg drove it.', items:[
+    {t:'Create an abnormal / out-of-range group in stats -> everything outside normal range at the top, separate from the category groups', d:'8/25', s:'next', x:`
+      <p>Stats today groups labs into clinical categories (blood, kidney, and so on). Anything not in a category does not trend, so a bad value can sit on the diagnostic report and never surface where the user actually looks.</p>
+      <p>Greg's version of the failure: <i>"you naturally look at the stats and you think oh I'm healthy. You come to the report and you say — I had two things wrong with me I didn't catch."</i> The rule he landed on: <i>"the stat should include whatever categories you want plus anything that's out of line."</i></p>
+      <p>Kelly confirmed it was in the original story: <i>"one of them grouped for convenience in the most common labs, but anything outside normal range was also supposed to be highlighted."</i> Your answer was a commitment — <i>"definitely. I'll create a new group."</i> Jayanth: <i>"we can include out of range. That's a straightforward change. I can probably get that in quickly."</i></p>`, kids:[
+      {t:'Solve the duplicates -> an out-of-range lab also sits inside its category group', d:'8/25', s:'open', x:`
+        <p>Kelly: <i>"we had talked about having a category at the top; it became kind of challenging because there would be duplicates in the sections."</i></p>
+        <p>An out-of-range potassium belongs to kidney <i>and</i> to the new group. Decide whether it appears twice, is pulled out of its category, or is cross-linked.</p>`},
+      {t:'Projections and trends run on the out-of-range items too, not only the categorised ones', d:'8/25', s:'open', x:`
+        <p>This is the point of putting them in stats rather than leaving them on the report — Greg: <i>"You're going to track it against the next report and want to create a projection on it anyway."</i></p>`},
+      {t:'Link stats and the diagnostic report so an out-of-range value can’t be missed on either side', d:'8/25', s:'open', x:`
+        <p>Kelly's instruction, aimed at you: <i>"I think we might need to include it instead because that's where all the trends are. So just think about that a little bit from your UI perspective, because if it's on here, I may miss it if I'm looking in stats, or there's a link or something connecting them."</i></p>`}
+    ]},
+    {t:'Health Hub as the other home for the abnormal data -> the dashboard of things to look at', d:'8/25', s:'open', x:`
+      <p>Your suggestion in the meeting: <i>"maybe health hub actually. So that's a place like a kind of like a dashboard of their health hub. So that's a place we can put the abnormal data."</i></p>
+      <p>Stats is where the trends live; Health Hub is where a summary of "things to look at" belongs. Both, not either.</p>`},
+    {t:'Also flag the values trending the wrong way while still in range -> glucose is Greg’s example, feeds the plan', d:'8/25', s:'open', x:`
+      <p>From the caregiver review rather than the weekly, but the same mechanism. Kelly, to you: <i>"it's not just things that are outside a normal range. It's also alerting to trends that may be headed in the wrong direction. So he mentions glucose a lot… if my glucose is heading in the high range, even though it's still in the normal range."</i></p>
+      <p>This is where stats hands off to the plan — a wrong-direction trend becomes a prevention action.</p>`},
+    {t:"Fasting vs. non-fasting glucose gets misclassified so the trend splits -> may need a user edit, Kelly is checking the codes first", d:'9/4', s:'blocked', note:"Kelly is checking the codes first.", x:`
+      <p>Kelly hit this on her own record: <i>"I have a glucose trend of only two docs for non-fasting… So I don't get to see the trend. It's just really it's annoying as a user."</i> Severity, in her words: <i>"it's a pretty big deal because it's such a common measurement, and it's also important for diabetes pre-diabetes determination."</i></p>
+      <p>Jayanth's possible fix is user-facing, which is why it may land as design: <i>"maybe we update the cleansing to allow the user to change fasting versus not fasting. But that's just so specific. But I guess we can."</i></p>
+      <p><b>Blocked on Kelly</b>, who took the action to check the codes and whether it's systemic. If an edit affordance is needed it belongs with the existing cleansing edit patterns, not a new mechanism.</p>
+      <p class="files">data-cleansing-bulk-edit-flow.html · tap-to-edit-flow.html</p>`}
+  ]},
+  {title:'Reports', accent:'var(--warning)', src:'Team weekly Mon 2026-08-25, plus team meeting Fri 2026-09-04 — the 9/4 block is the bulk of it. Your note: check Jay’s add-on for the Reports.', items:[
+    {t:'Check Jay’s add-on for Reports -> see what’s actually live before designing on top of it', d:'8/25', s:'next', x:`
+      <p>What Jay has built and what Greg wants next are two different things — the check comes first.</p>
+      <ul>
+        <li><b>Diagnostic reports already carry the full panel.</b> Jayanth, demoing the lipid panel: <i>"this comes across as a report from EMR. But if you scroll down, it shows all of your lab results associated to that specific report: triglycerides, cholesterol. Even the ones that don't show in stats show up here."</i> That is the fact underneath the abnormal-group work — the data exists, the surfacing does not.</li>
+        <li><b>The reports tab is being hidden in the provider UI.</b> Kelly: <i>"this one's done with the provider UI, so I can hide that reports tab. Jay's got the initial one done, so I can hide that."</i> Confirm what "done and hidden" means before designing against it, and what it implies for the patient-side reports surface.</li>
+      </ul>`},
+    {t:'Radiology report is a quick fix and ugly -> needs a design pass', d:'8/25', s:'open', x:`
+      <p>Greg's words: <i>"We added the radiology report, but it was a quick fix, ugly report. Are we doing anything around that?"</i> On the list as a design problem with no owner named — take it.</p>`},
+    {t:'Anatomy visual -> Orion generates a picture of what the radiology report describes, then the plan hangs off it', d:'8/25', s:'open', x:`
+      <p>The most concrete new idea in the weekly. Greg's case, from his own injury: <i>"There's a lot of jargon that even when you translate it into English, is still jargon because the English is telling you about anatomy in English words, but the picture is far more interesting… I don't know what the fascial tear is and I don't know where it's at."</i></p>
+      <p>Jayanth's implementation shape: <i>"We can update the reports to show like a visual representation. So maybe our first stab at doing that image generation thing is with diagnostic reports, and if it has something to do with imaging, then we generate an image."</i></p>
+      <p>Two follow-ons Greg attached, both landing in the plan rather than the report:</p>
+      <ul>
+        <li>From the picture, <i>"you literally can just click — what type of physical therapy can you consider based on these anatomy problems?"</i></li>
+        <li>The existing 3D anatomy widget is on the table for replacement: <i>"our cute little 3D thing you guys did — it's telling me stuff that's useless. It says okay, you got a femur. Well, what does that tell me? Whether we keep it or replace it, you guys decide."</i></li>
+      </ul>
+      <p>Greg also required the generated image be saved with the plan so it does not change between revisions: <i>"you do have to have the ability to save the plan… That way, the image won't change."</i></p>`},
+    {t:"Surface new and out-of-range labs on the reports tab -> review the tab first, I didn't design it", d:'9/4', s:'next', x:`
+      <p><b>The only formal action item Otter recorded against you for 9/4:</b> <i>"Review the reports tab and propose a design for surfacing new and out-of-range lab results, including date handling and an appropriate category for currently ungrouped data."</i></p>
+      <p>It started as a personal failure of the product. Kelly got labs from Texas Health Resources and the app told her nothing: <i>"when I went into our app, I knew I had new labs, and they were kind of there. But the way the stats are categorized, I would have to go through each category, and there's no color coding or indicator that we designed or talked about in any story that gives me that here's the new lab."</i></p>
+      <p><b>Her benchmark, and it isn't flattering:</b> <i>"if I go into my patient portal — patient portals, that is one of the very few things they are good at. Get your test results. There it is. There's an indicator. You've got a new test."</i> The target: <i>"I want to think through the notification so it's at least as good as the patient portal, hopefully better."</i></p>
+      <p><b>The three-part brief, verbatim:</b> <i>"Out of range, meaning abnormal, whatever that is, has to be kind of on top or highlighted. But we got to put some kind of date range to it, right? Because if it's a year old, do we keep showing that?… New, and then the other. So things that aren't currently grouped has to be in a category of other or somewhere."</i></p>
+      <p>Your answer, and the reason the line says review first: <i>"I want to review the report tab right now because it's kind of like new to me. I didn't do the design for that, but let me think through that."</i></p>
+      <p><b>It overlaps the plan work by Kelly's own framing:</b> <i>"Yue, for your treatment plan, if you could add this… it would be helpful to make that kind of the next thing on the reports tab."</i> And it is the same concept as the 8/25 abnormal-group line under Health Bio &amp; Stats — she grouped them herself: <i>"I kind of group these together, so the out of range and the reports, because it's the same concept."</i></p>`, kids:[
+      {t:"Three things: abnormal on top with a date-range rule, new, and an \"other\" bucket for what isn't grouped", d:'9/4', s:'open', x:`
+        <p>The recency rule is the unresolved part: <i>"if it's a year old, do we keep showing that? Like that'll be an important component of it."</i> Nobody proposed a window.</p>
+        <p>Jayanth first pushed back — <i>"that should be in chronological order, and it should have your latest lab result on top"</i> — then withdrew: <i>"I'm not saying that there shouldn't be a way where we show new labs. I was confused."</i> So the gap is signalling, not sorting.</p>`},
+      {t:"Has to beat the patient portal -> \"you've got a new test\" is the one thing portals do well", d:'9/4', s:'open', x:`
+        <p>Kelly's full framing: <i>"the patients, even though they don't get a notification, would still prefer to come to C for P rather than their patient portal for new tests."</i> That is the bar the indicator has to clear.</p>`},
+      {t:"No push for non-partner systems -> the indicator has to carry it without a notification", d:'9/4', s:'open', x:`
+        <p>Kelly: <i>"if we're not partnered with them, there's no way we can give them the alert, right?"</i> For most patients there is no push, so the in-app signal does the whole job.</p>`},
+      {t:"Jay is adding observations read-only into Review your records on every refresh", d:'9/4', s:'open', x:`
+        <p>He is building his own half in parallel: <i>"maybe the review your records comes back if there's a new lab record that the patient hasn't seen yet… That's a simple enough change for me to add. In current review of your records, add observations as a read-only thing."</i> Trigger: <i>"On every refresh, we show review your records on every refresh."</i></p>
+        <p>Design has to assume this exists and not duplicate it.</p>`},
+      {t:"Map the EMR's \"final\" status to normal / abnormal in patient language", d:'9/4', s:'open', x:`
+        <p>Results read <i>"final"</i>, straight from the EMR. Jayanth: <i>"the final comes from EMR for diagnostic report. It's not something that we created, but we can always map it to something that makes more sense for the patient."</i> Kelly's point: in the portal <i>"instead of it saying final, I knew which tests were normal and abnormal."</i></p>`},
+      {t:"A report is a collection -> the lipid panel carries all its observations, an imaging study is one thing", d:'9/4', s:'open', x:`
+        <p>Jayanth: <i>"reports is usually a combination of a collection of lab results, as in stats, or an actual MRI or imaging study done… if you had your blood test, then a diagnostic report comes across as lipid panel with all of your blood results in that diagnostic report."</i></p>
+        <p>So "new" and "abnormal" have to work at both levels — the report, and the observations inside it. He also deferred the layout outright: <i>"If there is a better way to show it, I'm all up for it… there might be other ways to show it, Jue."</i></p>`}
+    ]},
+    {t:"Orion generates the image when an imaging report has no picture -> Greg's ask, only MRI / X-ray / CT, patient first, keep it open for the provider", d:'9/4', s:'pause', note:"Paused on data, not priority.", x:`
+      <p>Greg's ask, relayed by Jayanth and offered as an experiment: <i>"if you want to take a crack at it, is if there are images showing images and generating images."</i> The case: <i>"all it has is the text of what that MRI report came back with, and there is no image, because the EMR didn't give us the image… which might be a far-fetched idea, but we can try and see."</i></p>
+      <p><b>Imaging only.</b> <i>"if there is a lipid panel report, I don't want an image generated for a lipid panel report. But if it is an MRI or an X-ray or a CT scan… then we should generate an image if there is no image already."</i> Open sub-problem he named: how do we detect which reports are imaging-related?</p>
+      <p><b>Audience.</b> You asked <i>"it's for user only, right? The provider don't need to see the generated image, or it's shared?"</i> — answer: <i>"keep it open for both, I would say, but initially for the patient, Greg's ask."</i></p>
+      <p>Your broader framing is the better version of the idea and matches your 8/31 counter-proposal: <i>"under each report or associated to any kinds of data, maybe the user will have the needs to visualize them"</i> — a documentation / images section per Health Hub category, not a one-off on radiology.</p>`, kids:[
+      {t:"Nothing to design against yet -> Kelly can't see her own mammogram, Sutner may be the only system sending images", d:'9/4', s:'open', x:`
+        <p>Kelly: <i>"we've had a lot of challenges getting images at all… If I wanted to see my mammogram, I can't do it through our app, and even when I upload my own, I still don't see it. Like if I ask for it — show me my latest mammogram — I don't get that. It doesn't pull it up."</i> Jayanth: <i>"I think Sutner is the only one that actually sends images."</i></p>
+        <p>Same conclusion as the 8/31 line: image generation needs a job before it needs a design.</p>`}
+    ]},
+    {t:"Images as their own class in the UI -> a mammogram shouldn't sit under tests and procedures, Jay says diagnostic report is the right home", d:'9/4', s:'pause', note:"Kelly parked it pending provider testing.", x:`
+      <p>Kelly: <i>"what do we need to get you from a coding perspective for images so that that can be a kind of separate bucket for UI, because it really is a separate class — if it's an X-ray, a CT, an MRI. And right now those are all under tests or procedures category."</i> The concrete failure: <i>"when I get a mammogram, it wasn't under the right category to be clear that that's something I needed to see as an image."</i></p>
+      <p><b>Jayanth disagreed</b>, and his position is the current build: <i>"I think diagnostic report is the best place… diagnostic report should have your mammogram. Whether you have images or not is whether the EMR sent it or not."</i></p>
+      <p>Kelly parked it herself — <i>"I'll just keep that on the back burner"</i> — and wants to test the grouping with a provider first: <i>"how do we find some identifier to group that within the diagnostic results."</i></p>`},
+    {t:"Plain-language label on clinical report names -> nobody searches \"breast diagnostic bilateral with tomosynthesis\", they type mammogram", d:'9/4', s:'open', x:`
+      <p>Kelly's example is the whole argument. The report is called <i>"breast diagnostic bilateral with tomosynthesis"</i>, <i>"which is kind of confusing. So maybe there's a way we can have Orion attach a mammogram label, because that's what everybody will know it as… They're going to type in mammogram, then it will specify the type. Maybe that's something else we can think about adding down the road."</i></p>
+      <p>Two surfaces, not one: the label on the report row, and what search accepts.</p>
+      <p class="files">Health Data Category_User Friendly Laungae.xlsx</p>`},
+    {t:"Document titles are gobbledygook on both sides -> no filename comes from the health systems, provider + type + date may be the label", d:'9/4', s:'pause', note:"Nothing to do now \u2014 refine after Portu testing.", x:`
+      <p>Raised against provider Orion source cards, but Kelly confirmed it's the same on the patient side: <i>"we get the same thing on the patient side, where it's this gobbledygook of characters."</i> Her ask: <i>"are we gonna keep it as this long, like uninterpretable thing, or do we change the label, the title?"</i></p>
+      <p>The constraint is real. Jayanth: <i>"We don't get the file name from health data documents. So we kind of make it up using the practitioner name… I generate this file name based on provider name, category of the document, which is HPI note and stuff like that. So I don't know what 13849 is, but it concatenates a bunch of different categories."</i></p>
+      <p>Kelly's target and her own deferral: <i>"nothing to do now, but we can say this is your — you get the provider name, what it is, and the date, and maybe that's what the right label is."</i> She also noted the redundancy <i>"just takes up extra space."</i> Refine after Portu testing shows what notes actually come through.</p>
+      <p class="files">sources-hybrid-row.html · sources-no-logos.html · orion-source-chip-spec.html</p>`},
+    {t:"Reports tab grouping is due next Tuesday to Greg -> Greg: do it first, the pilots need it, and Jay's diagnostic tab is waiting on my UI", d:'9/8', s:'next', x:`
+      <p>Kelly set the date on the sprint board: <i>"we'll make that due next Tuesday for your presentation to Greg."</i> You folded it into one piece of work with the abnormal / normal grouping: <i>"this task I will do with the abnormal and normal task together because it's the Health Hub upgrade. So I will take it as one overall structure."</i></p>
+      <p><b>Two people are blocked on it.</b> Greg: <i>"I saw the basic list you did. I thought you were doing something more, and we were also going to get the visual."</i> Jayanth: <i>"that's what we're still working on, Greg. Yuehui will have a UI ready for it, and then I'll make the updates. But right now, all we have is the basic list."</i> Greg's call: <i>"That needs to be the first one you do because you're going to need that with the pilots."</i></p>
+      <p>Kelly also caught that the out-of-range labs dev task was staged wrongly: <i>"out of range labs, which should not be ready for dev actually, because you haven't completed the design."</i></p>`}
+  ]},
+  {title:'Treatment Plan / Lifestyle Plan', accent:'var(--secondary)', src:'Born in Greg\u2019s pricing / product meeting 2026-08-24, reinterpreted in the caregiver review + team weekly 2026-08-25. Full extraction: C4P_TreatmentPlan_Requirements-Brief_v1.md. First pass due Tuesday with caregiver.', items:[
+    {t:'Design the first-pass one-page plan view from Vitality data, and recommend where it lives', d:'8/25', s:'next', x:`
+      <p>Kelly's assignment, verbatim: <i>"why don't you mock something up of what the one pager would look like, and then we'll go with where it goes… You suggest where the treatment plan button or view goes, and then we go from there."</i></p>
+      <p><b>What it is:</b> a holistic plan across inside health, care and lifestyle, generated from Vitality data, reviewed and adjusted by a provider, then tracked day to day. Jayanth: <i>"at the end of the day, we are using Vitality data."</i> The loop is Orion generates, provider reviews and adjusts, patient sees it and can influence it, provider tracks adherence.</p>
+      <p>Greg's own requirement is one page: <i>"I need one page that shows me everything that I need to focus on. Right now, I have to click on two, three different things."</i></p>`, kids:[
+      {t:'Where it goes -> settled 8/31: a section inside Vitality, not a fifth chip, a plan doesn’t feed the roll-up', d:'8/25', s:'open', x:`
+        <p><b>Settled in your 8/31 mockups.</b> Treatment plans are a section inside the Vitality tab. The reason to lead with: the category row is the roll-up, and a plan contributes nothing to that calculation — it reads across all three categories and reflects them. Greg keeps a page that is not Vitality, Jay keeps one data source and no new tab.</p>
+        <p>The two loudest voices disagree. Kelly relaying Greg: <i>"Greg was not on board with the treatment plan or lifestyle plan replacing the vitality page. He clearly wanted it to be a separate UI that is shown elsewhere, linked from the homepage."</i></p>
+        <p>Jayanth wants exactly that replacement: <i>"I still think we should replace the vitality tab to treatment plan… we still show the needs focus. We just change the name."</i></p>
+        <p>Your proposal on the table is a <b>fifth tab</b> — treatment plan / verified by provider — keeping Vitality first as the overall evaluation. Your recommendation settles it.</p>`},
+      {t:'Decided in substance, never ratified -> Jay doesn’t care about the label, the data comes from Vitality', d:'8/31', s:'open', x:`
+        <p>Jay, 8/31 at 1:20:51: <i>"we just either we change the vitality tab or we change the vitality landing page to call it treatment plan, or we add another thing called treatment plan. I don't care, but at the end of the day, it's the data coming from Vitality."</i></p>
+        <p>Your decision is compatible with all three of his options and is the least disruptive. Nobody said yes to it out loud, so state it as a decision at the Greg review rather than letting it be discovered. Kelly deferred when you asked directly: <i>"let's create a one-page treatment plan. It should be aligned to the vitality goals, but maybe we have to go back and rethink that down."</i> That defers the label, not the model.</p>`},
+      {t:'Both halves: a short text snapshot of what to focus on, plus the goals with live tracking', d:'8/25', s:'open', x:`
+        <p>You asked whether it is tracked goals or a static text plan. Jayanth: <i>"Both. Greg wants to see a snapshot of the overall summary for the patient, like what they need to focus on — that would be in text. But they'll also see all the goals and how they are tracking."</i></p>`},
+      {t:'Keep the prose short -> show the provider’s goal inside the tracker instead of writing a paragraph', d:'8/25', s:'open', x:`
+        <p>Kelly: <i>"it may be more convenient visually, so it's clear what the actions are versus the long paragraph to read. Because I wouldn't get that."</i></p>
+        <p>Your answer, which Kelly called a good example: <i>"you have your provider's treatment plan goal of your daily steps. We can just directly show it in the steps and the data tracking. We can set a goal for them so they don't need to read any text."</i></p>`}
+    ]},
+    {t:'"Verified by your provider" tag on individual goals + a filter for the verified ones', d:'8/25', s:'next', x:`
+      <p>Your counter-proposal, and the strongest idea in the meeting: <i>"the treatment plan is more like a backbone behind our vitality system. It's not another single redundant duplicate of our vitality system… the valuable stuff for the user is 'this goal is verified by your provider.'"</i></p>
+      <p>Mechanic: tag individual goals as verified by provider, plus a filter for all provider-verified goals. Kelly agreed and merged it with the one-plan model: <i>"it still should be an all-one plan, but I like your idea, just an indicator of which ones you've already discussed or been approved by or set/ordered by your provider."</i></p>
+      <p>Naming distinction Jayanth wants preserved: a <b>physician-reviewed</b> plan (Dr. Portu actually reviewed this patient's plan) versus a <b>physician-backed</b> plan (the generator was shaped by provider input across all patients). <i>"Two different product landscapes."</i></p>`, kids:[
+      {t:'Handle the conflict case -> my own goal vs. what the provider set last year', d:'8/25', s:'open', x:`
+        <p>Yours: <i>"my weight management probably conflicts with my original last year's treatment plan from my provider."</i> Detect and surface it.</p>`}
+    ]},
+    {t:'Prevention elements -> trending the wrong way, not only out of range', d:'8/25', s:'open', x:`
+      <p>Same mechanism as the abnormal-stats work, different surface. Kelly: prevention lives in the plan as <i>"actions or monitoring or to-dos"</i>, and eventually as standing orders — <i>"I need these four labs done. So it's in the plan already. Just clicks the button."</i></p>`},
+    {t:'Provider adjusts Orion’s plan -> 5,000 steps not 10,000, 50g protein not 200g on poor kidney function', d:'8/25', s:'open', x:`
+      <p>Keep the two canonical cases in the spec: <i>"I see why you suggested the patient should walk 10,000 steps, but maybe they should just walk 5,000"</i> and <i>"I see why you suggested 200 grams of protein, but they don't have proper kidney function, so they have to do only 50 grams per day."</i></p>
+      <p>The patient can push back too — <i>"they have a nutrition plan, and they want to say that I don't like broccoli."</i> Provider then tracks adherence day to day.</p>
+      <p>Today only the meds goal is implemented; sleep, activity and diet / nutrition goals are coming, and the plan assumes them.</p>`},
+    {t:'Revise the Vitality landing page -> needs-focus goes nowhere right now', d:'8/25', s:'next', x:`
+      <p>Jayanth's framing of the whole effort: <i>"this is essentially vitality landing page, but better vitality landing page."</i> The concrete defect: <i>"if we click on that needs focus, there is nothing there. It's just explaining vitality… it's an empty screen almost right now."</i></p>
+      <p>Kelly's sketch of the fix, which doubles as the argument to bring Greg: <i>"these could say in the top, inside health needs your attention for these three items, and then these two are fine, and then this is the detail for your treatment plan."</i> Her read on Greg: <i>"maybe he's not clear that there's really nothing behind this, and then this brings it all together."</i></p>
+      <p>Four tabs today: Vitality, Inside Health, Care, Lifestyle.</p>`},
+    {t:'Name it -> lifestyle plan / treatment plan / preventative plan, still unsettled', d:'8/25', s:'open', x:`
+      <p>In play: lifestyle plan (Greg's preference), treatment plan, preventative plan, lifestyle treatment plan, verified by provider.</p>
+      <p>Jayanth's objection to Greg's: <i>"I'm confused when we say lifestyle because we already have a lifestyle thing."</i> And on the current name: <i>"maybe we shouldn't call it vitality because nobody understands vitality."</i></p>`, kids:[
+      {t:'Billing needs "preventative", every 9/1 mention was "lifestyle plan"', d:'9/1', s:'open', x:`
+        <p>The 8/24 requirement was that the name carry <b>preventative</b> so it maps to a billable service. Every mention across both 9/1 calls was "lifestyle plan" or "lifestyle treatment plan", and Greg used "preventative plan" only when asking whether it could be billed.</p>
+        <p>So the name is carrying two jobs now: what the patient sees, and what the claim says. They may not have to be the same string.</p>`}
+    ]},
+    {t:'Multiple plans, one per provider / topic -> plans list with Active and History, single page each', d:'8/31', s:'blocked', note:'Kelly and Jay both argued for one plan on 8/31.', x:`
+      <p>Your own new model, from the 8/31 frames: an NLP-1 weight management plan from Dr. Medina, a cardiology plan from Dr. Patel, each with its own page. It matches how care actually works, and it matches Jay's pricing, which charges the provider per plan generated — a per-provider charge only makes sense if a plan is a per-provider object.</p>
+      <p><b>Greg asked for the opposite</b> on 8/24 and will reopen it: <i>"I don't want this plan to be just between the primary and the patient. I want to have the ability for other doctors and specialists to be able to share that plan with each other."</i> One plan, many doctors, versus your many plans, one patient. Both fix the fragmentation he described; yours survives a specialist who never logs into our provider app.</p>
+      <p><b>Reversed on 8/31.</b> Kelly and Jay both argued against it in the same meeting, independently. Jay's failure case: <i>"what if my cardiology treatment plan says step count 5000, and what if my weight management plan says step count is 10,000?"</i> Kelly: <i>"we don't want a primary care plan and a specialist plan. We want, I'm one person, I need one plan."</i> Greg has seen neither version, and he is the one who asked for one plan, so this is blocked rather than dropped.</p>
+      <p class="files">treatment-plan-patient-ia.html (v2) · C4P_TreatmentPlan_Requirements-Brief_v1.md · C4P_TreatmentPlan_Feedback-Extract_2026-09-03.md</p>`, kids:[
+      {t:'Kelly and Jay both argued for one plan on 8/31 -> Greg hasn’t seen either version', d:'8/31', s:'open', x:`
+        <p>Read Kelly carefully: she did not reject the reality your mockups were modelling, which is several providers with several agendas. She <b>relocated</b> it. <i>"When there's discrepancies, those would be raised within the plan. Like, hey, you need to talk to Doctor So and So, or these doctors need to talk."</i></p>
+        <p>The conflict becomes an item inside the single plan, not a second plan. Smaller design than a plans list plus reconciliation, and it lands on the page Greg asked for.</p>`},
+      {t:'Cross-plan focus summary at the top of the plans list -> that’s Greg’s one place to look', d:'8/31', s:'blocked', note:'Becomes the top of the single plan if one-plan holds.', x:`
+        <p>With several plans there is no single page any more, so the list has to carry the combined picture: what needs attention right now across every active plan, before the per-plan cards start. In the frames that slot holds an Orion Insights card with placeholder text. If it stays generic, Greg gets three levels of navigation where he asked for one.</p>`},
+      {t:'Unreconciled targets state -> two plans, two numbers, nobody resolved it', d:'8/31', s:'open', x:`
+        <p>Your rule is that the most recent provider reconciles conflicts before publishing, so the patient only sees a clean version. Two problems. It assumes the provider builder shows Dr. Patel Dr. Medina's plan, which is the interoperability problem we are still solving, so it cannot be a precondition of the patient-side design. And it lets one provider overwrite another's clinical decision.</p>
+        <p><b>Softer model, same clean result:</b> one active target per metric with attribution and no overwriting. The newest target is the active one, and the other plan's page names where it came from — "target under 120, set in the cardiology plan" — instead of showing a number its own author did not choose.</p>
+        <p>Draw the unresolved state once anyway. A plan from outside the network will never have been reconciled, and then it is the norm rather than an edge case.</p>`},
+      {t:'Provider’s own words above Orion on the plan page -> the frames have it the other way round', d:'8/31', s:'open', x:`
+        <p>Orion Insights currently holds the first slot on both the list and the plan page, and the provider's voice appears only as PDF thumbnails under Documents. Greg's whole thesis is that this plan is doctor-controlled rather than AI-generated, so an AI card in the first position argues against the feature.</p>`},
+      {t:'Scope plan stats to the plan period, not the calendar month, and store the baseline', d:'8/31', s:'open', x:`
+        <p>Every section on the plan detail reads "avg this month". A plan that started 12 Aug is being judged partly on days before it existed. Show "since 12 Aug", and store the value at that moment as the baseline — which is also Greg's before-and-after framing, currently missing.</p>
+        <p>Same pass: every goal needs a by-when, and the next-visit date should be on the page so the amend loop is visible.</p>`},
+      {t:'Ended plans should say what happened -> that’s where before / after lives', d:'8/31', s:'open', x:`
+        <p>History cards carry "Ended on 23 Apr 2025" and nothing else. A finished plan is exactly where the before-and-after story belongs, and the data already exists.</p>
+        <p>Also unresolved: Active cards say "Verified by", History cards say "Proposed by". If proposed is a real state, a provider can push a plan the patient has not accepted, and that needs a flow.</p>`},
+      {t:'Mark needs a short plan label, a "2 plans" count, and a Mine state', d:'8/31', s:'open', x:`
+        <p>With one plan, "Provider" was enough. With several, the mark has to name which plan, and that costs width — the 11:30 med group already carries two plan chips on one row.</p>
+        <ul>
+          <li>Short label, full name on the plan page: "NLP-1", not "NLP-1 Weight management plan".</li>
+          <li>Two or more plans collapse to a count. "2 plans" beats two truncated chips.</li>
+          <li>One plan mark per row, maximum. Lisinopril already carries a category glyph plus a plan chip, and the Meds screen adds "Level 2: Prevention" above.</li>
+          <li><b>The unmarked state is what gives the mark meaning.</b> If every row is verified, verified is wallpaper — the patient's own goals need to look different, and they are the queue for the next visit.</li>
+        </ul>`}
+    ]},
+    {t:'Premium vs. base for the plan is still open -> Kelly and Jay don’t agree', d:'8/25', s:'blocked', x:`
+      <p>Blocked on a business decision, not a design one — but it changes what the caregiver view can show.</p>
+      <p>Jayanth in one breath said base sees no treatment plan, and in another that <i>"patient base mode should have access to that treatment plan"</i> under the provider-pays model (about $5.99/month per generated plan, provider bills the payer). Kelly: <i>"I think base treatment plan hopefully will be included because otherwise view won't be as useful."</i> She is writing the model up. Design both states until it lands.</p>
+      <p>Ethics constraint both agreed on and worth designing around: the provider must never be the one pushing the patient to upgrade. Jayanth — <i>"Anything that puts the provider on hook for patient signing up is a kickback."</i></p>`},
+    {t:'Greg’s page content, top to bottom: goals, then treatment / diet / workout / meds under each, then the key lab and radiology problems', d:'8/24', s:'open', x:`
+      <p>His own stack, in his own order: <i>"goals: lose weight, eat better, fix glucose, blood pressure, heart disease, whatever the medical plan is. Underneath that, it says, okay, here's the treatment for these medical issues. Here are the diet and workout programs and medications you need to take to address this, and here's the trending of the current and past labs, and then here are goals that are in addition to that that I might have."</i></p>
+      <p>Also on the page: <i>"here are the key problems in the lab results, in your radiology reports"</i>, plus dietary and workout monitoring.</p>
+      <p>His summary of the whole ask: <i>"I just want one more UI that's generated on the goals that are set both by the doctor and the patient."</i></p>`, kids:[
+      {t:'Every goal needs a target, a timeline, and a starting point so the trend has a baseline', d:'8/24', s:'open', x:`
+        <p><i>"It's got all the trending. So it's got this starting point, and then it keeps trending until you've exceeded or not on your goal plan."</i> And: <i>"the goal needs to have a timeline you're trying to do it within."</i></p>`},
+      {t:'Before / after framing -> what’s your current, what do you want your after to be', d:'8/24', s:'open', x:`
+        <p>Lifted from how diet and workout programs are actually sold: <i>"they show you before and after pictures of everybody… so you're trying to create that. What's your current before, and what do you want your after to be?"</i></p>
+        <p>The same shape becomes marketing later — de-identified before / after labs from a finished plan.</p>`},
+      {t:'Drill-down goes to the screens we already have -> Vitality keeps scanning everything, the plan only measures what was agreed', d:'8/24', s:'open', x:`
+        <p><i>"Every one of those click downs, you already have. How am I doing against the plan?"</i></p>
+        <p>The division of labour he insists on: Vitality keeps scanning the whole record for new problems — <i>"we don't want to get away from the thing that's looking at everything"</i> — while the plan measures only what the doctor and patient agreed to.</p>`}
+    ]},
+    {t:'Provider builds the plan on desktop with the dashboard’s drag-and-drop framework -> assembled on the fly per patient', d:'8/24', s:'open', x:`
+      <p>Greg asked directly: <i>"I'm hoping that we built that drag and drop user defined framework. Is there any reason that same framework can't be viewed on the patient side, Jay?"</i></p>
+      <p>Assembled per patient — <i>"it literally needs to be created on the fly for each patient"</i> — by dragging in the goals and elements that apply.</p>
+      <p><b>Why creation is desktop and in-visit:</b> <i>"it's something you do with the doctor because the doctor needs to be able to bill for this."</i></p>
+      <p><b>This is the provider side.</b> Note what Greg actually asked, because it is narrower than it sounds: <i>"is there any reason that same framework can't be <b>viewed</b> on the patient side, Jay?"</i> He was asking about rendering the same widget structure on mobile, which is why Jay answered <i>"showing the view is not a problem."</i> Framework reuse on the patient side is a rendering question, not an editing one.</p>`, kids:[
+      {t:'Patient side displays and inputs, doesn’t configure -> no dashboard building on mobile in the first release', d:'8/24', s:'open', x:`
+        <p>Jay flagged drag and drop is hard to replicate on phones. Greg: <i>"you can only build it on the computer, but you can display it on the phone. You can't even build a new plan on the phone."</i> And: <i>"at least in the first release, do we need the phone to have the ability to configure a dashboard?"</i> Kelly: <i>"start with the treatment plan. Do it."</i></p>`},
+      {t:'Whether the patient ever rearranges their own plan is Jay’s open item -> parked behind my first pass', d:'8/24', s:'open', x:`
+        <p>Not settled in the meeting. Jay took it: <i>"we can let you know when she builds the treatment plan landing page, the ability to see if we can leverage the same drag and drop functionality to allow users to edit stuff."</i></p>
+        <p>Kelly's select-and-pin is the candidate pattern if the answer is yes. Separate question from where the plan view lives, which is yours to recommend.</p>`},
+      {t:'Kelly’s mobile alternative -> select / pin instead of drag and drop', d:'8/24', s:'open', x:`
+        <p>Still open: <i>"maybe we have a select option to pin things versus drag and drop… it seems more aligned for the patient functionality."</i> Cross-ref the select / pin pattern already used elsewhere in the app.</p>`},
+      {t:'Patient edits inputs, not layout -> weight, which of two prescriptions they actually take', d:'8/24', s:'open', x:`
+        <p>Greg: <i>"they're more input on what they've done."</i> His examples: correcting his own weight, and picking which of two conflicting prescriptions he actually takes — Lipitor 80 from one doctor, 20 from another. From 8/25: <i>"I don't like broccoli"</i> in a nutrition plan.</p>`},
+      {t:'Symptoms that resolve drop off the plan on their own', d:'8/24', s:'open', x:`
+        <p><i>"If I've got symptoms that go away… an easy way to get to the things that are changing, and it immediately changes the dashboard."</i></p>`}
+    ]},
+    {t:'Plan gets amended at every visit -> add and subtract items, show what we agreed vs. what you did', d:'8/24', s:'open', x:`
+      <p><i>"You're adding and subtracting things against that formalized plan every time you meet with a doctor."</i> The plan is the patient's lifecycle record, not a snapshot: <i>"here's everything that's been wrong with you that's still there. Here's what you've been doing. This is the success or failure for each one of them."</i></p>
+      <p>At the visit it becomes the agenda: <i>"what did we agree to, you and I, Mr. Patient, and let's see how well you've done."</i> The accountability conversation is deliberate: <i>"gonna be interesting when it says quit smoking and the guy didn't, and eat this diet and the guy didn't, but it's the kind of discussion you want to have."</i></p>
+      <p>The doctor's new question at the next visit: <i>"why does that new symptom exist if I did this plan and adhered to it, or is this something new that I need to add into the plan?"</i></p>`, kids:[
+      {t:'Provider’s pre-visit summary of the plan, and a treatment plan link in visit essentials', d:'8/24', s:'open', x:`
+        <p>Greg: <i>"doctor can see it right before the meeting in a summarized form."</i> Kelly's addition: <i>"might be a cool thing to add then to the visit essentials would be the treatment plan link."</i></p>
+        <p>She extended it on 8/25: the provider snapshot should be current conditions, care needs, lifestyle elements, then alignment to the treatment plan.</p>`},
+      {t:'Audit trail -> let the doctor see where the patient went with Orion on their own', d:'8/24', s:'open', x:`
+        <p><i>"If you want, we can put in there the ability for the doctor to say, I want to see where else this guy went drifting off with the AI, so it addresses the control concern."</i></p>
+        <p>Design question that follows: does the patient know the doctor can see that? It needs a consent or disclosure surface, same family as the caregiver consent work.</p>`}
+    ]},
+    {t:'Share the plan across doctors and specialists, not just primary + patient', d:'8/24', s:'open', x:`
+      <p><i>"I don't want this plan to be just between the primary and the patient. I want to have the ability for other doctors and specialists to be able to share that plan with each other."</i></p>
+      <p>His reference case is Roque at Southwest Medical Research: eight doctors adding real-time information with no way to collaborate — <i>"everybody's just adding different information, and we have no way of collaborating on how all this relates to each other."</i> Overlaps the sharing and care-team work.</p>`},
+    {t:'Known useful supplements section off the labs -> turmeric, glucosamine, L-arginine', d:'8/24', s:'open', x:`
+      <p>Raised as his <i>"last thing"</i> on 8/24: <i>"if you look at the labs, I bet you we could have a section that says known useful supplements."</i></p>
+      <p>The frustration behind it: <i>"the doctor is measuring my inflammation but he's prescribed me zero to do about it."</i> His three examples are the spec's test cases — turmeric for inflammation, glucosamine for joint pain, and L-arginine, which he researched himself rather than accept a CPAP mask after a sleep study.</p>
+      <p>Payer argument he likes: <i>"instead of prescribing expensive drugs, you're buying supplements that they don't have to pay for."</i> Kelly also wants supplements in suggested questions, and flagged a billing angle.</p>`, kids:[
+      {t:'Show the backing research -> the doctor has to believe them', d:'8/24', s:'open', x:`
+        <p><i>"The doctor would have to believe these are good supplements, so we should have the backup research for them."</i> So every recommendation carries a source, not just a name.</p>`},
+      {t:'Two ways in -> Orion suggests it to the provider, or the provider adds it directly', d:'8/24', s:'open', x:`
+        <p>Kelly's framing, which Greg took: <i>"here's some things that you might want to suggest for your patient, doc, and put in their plan"</i> — Orion to provider — <i>"or things the provider recommends directly."</i></p>`},
+      {t:'Supplement research, not a supplement list -> label photo to verdict, per-ingredient interaction check, reverse search', d:'9/1', s:'open', x:`
+        <p>Greg, 9/1. Three capabilities, not one list:</p>
+        <ul>
+          <li><b>Label photo to verdict</b> — <i>"I just take a picture that's on the site, or if I was dumb enough to buy it, and show the front and then I show the ingredients. It tells me immediately whether it's bullshit, whether it's over tested, any third-party review."</i></li>
+          <li><b>Per-ingredient interaction check</b> against current meds — <i>"it looks at each individual ingredient and says that one has a known capability, this one can be dangerous to you."</i></li>
+          <li><b>Reverse search</b> — <i>"tell me all supplements that are good anti-inflammatory supplements that will not interact poorly with the rest of my medications."</i></li>
+        </ul>
+        <p>His framing example: <i>"I don't take anti-inflammatories, even though my CRP is high. I just take turmeric... but you can't ask Orion that."</i> The business ambition behind it: a recommendation section for supplements with real trials behind them, <i>"and then we'll start making a cut on the sale."</i></p>`},
+      {t:'Entry point on the medication list, the plan links to it -> any premium user, not gated behind the plan', d:'9/1', s:'open', x:`
+        <p>Kelly's scoping note, and it is the one that affects your layout: <i>"I think we left it outside because users would want to do that whether or not they're using the lifestyle plan. So it's part of it, but it's not only accessible through the lifestyle plan. It's accessible to any premium user."</i> Greg agreed: <i>"it should be standard feature."</i></p>
+        <p>So do not build the plan as the owner of supplement research. The entry point lives on the medication list and the plan links to it.</p>`},
+      {t:'Maps to backlog item 14, the Orion + image upload', d:'9/1', s:'open', x:`
+        <p>Jay, 9/1: <i>"that's number 14, Greg. We added that into the list, and it's essentially having a plus button that allows us to upload images and stuff like that with Orion and ask a question about that image."</i> His proposed UI: a button that launches Orion with the image, plus <i>"suggested questions on the whole medication list."</i></p>`}
+    ]},
+    {t:'Diet and workout need real content -> recipes and actual programs, not just "eat less sugar"', d:'8/24', s:'open', x:`
+      <p>Greg's test: he asked Kelly how you reduce glucose, she said eat less sugar, he wanted the other half — <i>"your glucose goes down a lot faster if you get on a good workout program."</i></p>
+      <p>Conclusion: <i>"we need to get a little clearer on the diet and workout piece by actually telling them recipes and potential workout programs they could consider."</i> At plan creation Orion has to be able to say <i>"you want to follow these kind of guidelines on your diets and this kind of workout programs."</i></p>`, kids:[
+      {t:'Third-party diet / workout programs adapted to the record', d:'8/24', s:'pause', note:'Greg says get the plan in place first.', x:`
+        <p>His own call to defer: <i>"I want to start calling on social media people that are big in workout programs, dietary programs, so that we can use their programs but adapt them based on our medical information. That we don't have to do right away. I want to get the plan in place first."</i></p>`},
+      {t:'Food photo for adherence -> calories, fat, carbs, protein', d:'8/24', s:'pause', x:`
+        <p><i>"Eventually you're going to be showing proof of how many calories and how much fat you ate, based on the technology where you can take a picture."</i> Which turns into monitoring: <i>"did he stay off the sugar? Did he eat enough protein?"</i></p>`},
+      {t:'Greg wants ingested recipe / workout content in the one pager or one click off it', d:'9/1', s:'pause', x:`
+        <p>Greg, 9/1: <i>"we're going to have to be prepared to take on new services quickly on this preventative care. Being able to store videos of workout programs, diet recipes, things other than just say donate sugar and workout... Pick a popular recipe program and figure out how to grab that data and ingest it and make it available in that one pager, or click off that one pager."</i></p>
+        <p>Note the last clause. He said "or click off that one pager" himself, unprompted, which is your permission slip for drill-in.</p>`}
+    ]},
+    {t:'What I can and cannot do with my condition -> the radiology and physical limits belong in the plan', d:'8/24', s:'open', x:`
+      <p>From his own injury, and he is angry about it: <i>"if it's got a radiology problem like mine, it would also show me all the what I can and cannot do based on my condition. Which, by the way, I have had zero support from doctors on this."</i> Hospital gave the wrong answer, primary sent him for new tests, two weeks before anyone could tell him what to do <i>"other than don't walk around."</i></p>
+      <p>Hangs off the anatomy-visual item in the Reports block: Orion generates a picture from the radiology report, and the do / don't guidance sits with it, inside the plan.</p>`},
+    {t:'The plan demo in the auto-onboarding flow -> first thing a bulk-activated patient sees', d:'8/24', s:'open', x:`
+      <p>Greg's distribution path, and Jay's action item pairs it with the plan landing page. Bulk-load a practice's records, generate an account per patient, email an invite with a temp password, they download the app and land in a populated app. Then: <i>"we give them an immediate demo of the services that are available. One of which is this new plan concept that you will talk to your doctor about the next time you see them."</i></p>
+      <p>Also promoted in that flow: caregiver services, family history, Orion for research.</p>
+      <p><b>Two constraints.</b> It repeats — <i>"we don't do it once, we continually refer to them"</i> — so it needs a pattern that does not become a nag. And the kickback rule means the upgrade prompt cannot read as the doctor asking for money: <i>"this is a service that your provider is offering for you, and mention nothing about price."</i></p>`},
+    {t:'Scope the first draft to four buckets -> prevention & vaccines, med adherence, diet & nutrition, exercise', d:'8/31', s:'next', x:`
+      <p>Jay's list, chosen on one criterion: what a patient can use today with no provider involved. <i>"I can use medication adherence as a user or a patient. I can use diet or nutrition recommendations. I can use workout recommendations. I can use vaccine recommendations. That's it. Like, let's go with those top four."</i></p>
+      <p>His gate on everything beyond that: <i>"if we are building this because we know that we can pay for it, or we think that we can ask the providers to pay for it, then let's confirm that. While we are waiting on confirming that, let's not over build this."</i></p>
+      <p class="files">C4P_TreatmentPlan_Feedback-Extract_2026-09-03.md</p>`, kids:[
+      {t:'Prevention and vaccines -> decide one bucket or two, the recommendation engine already exists', d:'8/31', s:'open', x:`
+        <p>Jay confirmed the engine is live: <i>"caretab tells me I have to take a vaccine, flu vaccine this year."</i> Kelly confirmed it is age / gender / condition driven and de-duplicates against procedures already recorded, so it will not tell you to get a mammogram you already had.</p>
+        <p><b>Your call.</b> Kelly's worry is that prevention-and-screening as a single category has never been built, while vaccines has: <i>"vaccines has to go directly to vaccines... versus prevention and screening, that's something we still haven't developed into one category."</i></p>`},
+      {t:'Diet -> the doctor’s order on top, Orion’s curation under it, recipes behind a second click', d:'8/31', s:'open', x:`
+        <p>Kelly's shape: <i>"eat a low carb diet, maybe the high level order from your doctor, and what you're seeing in Orion is don't include certain meats, or I'm allergic to eggs, or gluten free."</i> Then: <i>"maybe we have a secondary click that says create a weekly or monthly plan... That's not going to be on your treatment plan. That's a second click."</i></p>
+        <p>Her open question: <i>"does the person really want recipes and a daily plan, or do they just want a list of foods that are part of their diet?"</i> A ceiling like "under 65g of carbohydrate a day" may be the whole answer for most people.</p>`},
+      {t:'Exercise -> basics only, link out to PT orders, exercises behind a second click', d:'8/31', s:'open', x:`
+        <p>Kelly: <i>"What are the basics? That should link to anything that the provider has ordered from physical therapy."</i> And the boundary: <i>"we're not going to show the exercises on the treatment plan."</i></p>`},
+      {t:'Med adherence -> reuse the approved design, don’t redraw it', d:'8/31', s:'open', x:`
+        <p>It exists, Greg approved it a while back, and it is Jay's current dev task. Kelly to Greg on 9/1: <i>"what you've already approved from a UI perspective is that med adherence. It's been sitting in the queue."</i> Nothing to design here beyond how it reads inside the plan.</p>`}
+    ]},
+    {t:'Add sleep as a bucket -> Greg: sleep is part of the base plan', d:'9/1', s:'next', x:`
+      <p>Greg, twice: <i>"that sleep is part of the base plan"</i> and <i>"definitely need sleep. Sleep is one of the most important things, right?"</i></p>
+      <p>Worth knowing how this went, because it changes what "we don't have the data" means. Kelly pushed back thinking sleep was unavailable and Jay corrected her: sleep <b>is</b> monitored. The bucket with no data source is <b>stress</b>. So sleep is in and stress is out, the opposite of where that exchange started.</p>`},
+    {t:'Buckets have to be configurable -> show a 4-bucket and a 7-bucket state', d:'9/1', s:'open', x:`
+      <p>Greg: <i>"let's build that goal orientation, and then monitoring buckets configurable, where we can add new categories or buckets based on what we come up with in future."</i></p>
+      <p>So the categories are not a fixed five-row layout. Whatever container you pick has to absorb a sixth and seventh bucket without a redesign. Drawing both states in the same frame set is the cheapest way to prove it at the review, and it pre-empts the question.</p>`},
+    {t:'Stress is out for now -> no data source, Jay can’t measure it', d:'8/31', s:'pause', x:`
+      <p>Jay: <i>"We can't really measure stress right now. How do we measure stress?"</i> Kelly: it depends what is linked through the user's devices. Parked until a wellness integration carries it.</p>`},
+    {t:'Labs as a goal with a cadence -> A1C every three months, doctor-authored', d:'8/31', s:'open', x:`
+      <p>Kelly: <i>"make sure you get your A1C every three months. That's the goal that a doctor put in for diabetes. They write a specific goal. You could start with something simple like that."</i></p>
+      <p>A different shape from the four lifestyle buckets: doctor-authored, a recurrence rather than a daily target, no device data behind it. It may be the cheapest version of condition-specific goals, which is otherwise deferred.</p>`},
+    {t:'Design the three plan states -> Orion-drafted with a disclaimer, provider reviewed, provider adjusted', d:'8/31', s:'next', x:`
+      <p><b>The most consequential thing to come out of 8/31, and it was not in the v1 brief.</b></p>
+      <p>Jay's problem: if a plan only exists when a provider makes one, almost nobody has a plan and nothing ships until billing is confirmed. His fix: <i>"we said treatment plan can have reviewed and approved by your provider, needs to be reviewed by your provider. So if we do that, then a treatment plan can be generated by Orion for everybody using vitality information."</i></p>
+      <p>And: <i>"it's one thing to say Orion generated this. This may or may not be true. We'll add a disclaimer saying that consult with your provider before approaching these. And if the provider reviews it, we make it bright green."</i></p>`, kids:[
+      {t:'Unreviewed is the default state, not the edge case', d:'8/31', s:'open', x:`
+        <p>Every patient with connected data gets an Orion-drafted plan carrying a consult-your-provider disclaimer. Design that state first and properly, because it is what ships and what most users will ever see.</p>`},
+      {t:'Jay wants "bright green" for reviewed -> check it against status tokens', d:'8/31', s:'open', x:`
+        <p><code>--color-status-success</code> at <code>#10b981</code> may be quieter than what he is picturing. More importantly, green already means "in range" elsewhere in the app, so plan-reviewed and value-in-range would collide on the same screen. Worth a deliberate treatment rather than reusing success.</p>`},
+      {t:'Pre-builder review path -> the patient shows the provider the plan and he updates it by hand', d:'8/31', s:'open', x:`
+        <p>Jay's own suggestion: <i>"maybe the patient goes to the provider, shows the C4P plan and asks him to review it. That's also a way, and he can manually update it, saying that yeah, it looks good, just update this."</i></p>
+        <p>This is the only path to a reviewed plan that works before the provider dashboard ships, and it has no design yet.</p>`},
+      {t:'Draw both frames for Greg -> "your provider built this" vs. "Orion drafted this, unreviewed"', d:'8/31', s:'open', x:`
+        <p>The state model quietly changes who the feature is for. The 8/24 brief has the doctor authoring the plan in the visit and billing for it. The 8/31 model has Orion drafting it for everyone, with provider review as an upgrade.</p>
+        <p>Both can be true eventually, but the mockup opens with one of them. If the default frame is "your provider built this", it will not match what ships first. If it is "Orion drafted this, unreviewed", Greg may hear it as giving away the thing he wants to charge for. Put it to him as a question with both drawn, rather than choosing quietly.</p>`}
+    ]},
+    {t:'Single plan with the conflict raised inside it -> not a resolution UI', d:'8/31', s:'open', x:`
+      <p>Kelly's model: one plan, and where providers disagree the plan says so. <i>"Hey, you need to talk to Doctor So and So, or these doctors need to talk because one is ordering... take it at 20 milligrams and the other one's saying 100."</i></p>
+      <p>Note what it is not. It does not resolve the conflict, pick a winner, or let one provider overwrite another. It surfaces it and routes it to the humans. That is a much smaller design than the reconciliation model in your 8/31 frames.</p>`, kids:[
+      {t:'Keep the per-item provenance mark -> one plan from several providers still says who set each target', d:'8/31', s:'open', x:`
+        <p>This survives the reversal and matters more in the single-plan model than it did in yours: "verified by your cardiology plan" on a nutrient row, "associated with your weight management plan" on a meds row. A single plan sourced from several providers still has to attribute every target.</p>`},
+      {t:'Keep plan history -> amended at every visit means versions need somewhere to live', d:'8/31', s:'open', x:`
+        <p>One active plan is not one plan ever. Amended-visit-to-visit is a Greg non-negotiable, so the Active / History split still has a job even without a plans list.</p>`}
+    ]},
+    {t:'No plan number Vitality doesn’t also show -> the plan is a projection of Vitality', d:'8/31', s:'open', x:`
+      <p>Jay's own test: <i>"in your treatment plan, if I say your steps are you need to do 9000 steps a day, that's because in your lifestyle summary it also shows that 9000 steps a day for a specific reason."</i></p>
+      <p>Useful as a design rule, not just a data rule. A plan goal is a <b>promoted</b> Vitality recommendation, never a parallel entry. If a goal appears on the plan with no home in Vitality, either Vitality is missing a category or the goal does not belong in v1.</p>
+      <p>Vitality keeps its own job: general "are you healthy" evaluation against population norms. That was your distinction — <i>"vitality evaluates are you healthy, treatment plan evaluates are you towards the goal your provider set for you."</i></p>`},
+    {t:'Entry surface answers "am I on track today" without opening a category', d:'8/31', s:'open', x:`
+      <p>Your instinct that "one pager" should not translate literally to the screen is right, and their own words back it.</p>
+      <ul>
+        <li>Kelly: <i>"a visual, cool guide that when you drill into it, it takes you to one of the other screens we already have, like a vitality or a lifestyle or a stats or a med adherence."</i></li>
+        <li>Greg, 9/1: <i>"make it available in that one pager, or click off that one pager."</i></li>
+      </ul>
+      <p>The promise is about hunting, not scroll length. Jay's restatement of the actual complaint: <i>"right now, I have to go into Inside Health, Care and Lifestyle and read through the summary to tell you what my goals are."</i> Three places to look is the problem.</p>
+      <p>The one thing it does constrain: if a patient has to open a category to find out whether they are on track today, the promise is broken however few screens there are.</p>`},
+    {t:'Make it visual and fun -> flashy, dopamine hits, less is more', d:'8/31', s:'next', x:`
+      <p>Kelly said it three times, so treat it as a requirement rather than encouragement. <i>"I think less is more in this case. Yuehui, like thinking about how Greg's always kind of poking at me, of or yelling, too much, take that out. This one is really how do we make it look good, fun to interact, want people to get their dopamine hits from following their treatment plan."</i> And: <i>"make this as flashy and as fun as possible."</i></p>
+      <p>Her sketch of the content: <i>"your treatment plan is to comply with your medication, get optimal sleep, follow this diet, and follow this exercise regime."</i> Four plain sentences, then the tracking.</p>`},
+    {t:'Widget-style composition for the patient plan -> Kelly’s second mention', d:'8/31', s:'pause', note:'Still behind the display-only rule for release 1.', x:`
+      <p>Kelly: <i>"kind of like the provider screen where you have this dashboard, and it's everything about the patient that the provider needs to know and can customize it per the widgets. Same thing for a treatment plan for a patient."</i></p>
+      <p>Second time someone has suggested the patient plan borrow the provider dashboard's composition model; Greg's drag-and-drop builder on 8/24 was the first. Parked behind the release-1 rule that the patient side displays and does not configure, but it is now on record from two directions, which makes it likelier to come back.</p>`},
+    {t:'Configurable med alert with a user-defined tolerance -> not next day', d:'9/1', s:'open', x:`
+      <p>Greg, on the caregiver walkthrough: <i>"you don't want to find out tomorrow they didn't take it today. You want to find out they're supposed to take it at noon, at two it's saying they have not taken their medications."</i> Then: <i>"just an alert that comes within a user-defined tolerance level to make sure they take it today, not find out tomorrow."</i></p>
+      <p>Your answer in the room was an evening backend sweep, which is the next-day pattern he was rejecting. The tolerance is per-schedule and set by the user, not a global sweep.</p>`, kids:[
+      {t:'Goes to the patient and the caregiver both', d:'9/1', s:'open', x:`
+        <p>Kelly: <i>"we did talk about that for the user, but it of course makes sense that it goes to the user and the caregiver. Any alert notification."</i> Greg: <i>"it's bigger benefit to the caregiver."</i></p>`}
+    ]},
+    {t:'Image generation needs a job before it needs a design', d:'8/31', s:'pause', note:'Kelly parked it behind the first four buckets.', x:`
+      <p>Kelly: <i>"Let's start with the first four, and then come back to the condition and image thing... We need to brainstorm a bit more on what does this do? What's the purpose? How does it get displayed? Why are we generating it? So let's not make that a barrier today."</i></p>`, kids:[
+      {t:'Greg’s real target is the 3D body map in conditions & procedures, not the plan', d:'8/31', s:'open', x:`
+        <p>Jay's account: <i>"he almost wanted to replace the body... in his mind, the 3D body map is not working for the conditions and procedure view, and he wants to replace that with ChatGPT image generation... He said it should be associated to treatment plan, but the first version of image generation, maybe we just show it in conditions and procedures instead of the body map."</i></p>
+        <p>Two asks wearing one name. Replacing the body map is a fix to a screen Greg thinks is broken and is not a treatment plan feature. Generated imagery on the plan is the part with no job yet.</p>`},
+      {t:'My counter -> a documentation / images section under each Health Hub category', d:'8/31', s:'open', x:`
+        <p>Your objection went unrebutted: <i>"if we directly replace the 3d body map in our app right now, it's really risky because everybody might generate different kind of images, and the images will take over the full screen... we don't have any control of the outcome."</i></p>
+        <p>Your alternative, which nobody argued with: generated images are stored against the data they illustrate. A condition body map files under the condition, a procedure diagram under procedures.</p>`},
+      {t:'Jay’s bridge -> generate for a goal only when the goal names a condition or procedure', d:'8/31', s:'open', x:`
+        <p>Jay: <i>"if the goals refer to a condition or procedure, then we can say generate an image for this specific goal... If because you have broken ribs, you can do ab exercises or something like that. Then choose the broken ribs. That's what Greg wants."</i></p>
+        <p>Kelly's alternative home for it: the look-good-feel-good photo comparison. <i>"take a picture, feel better."</i></p>`}
+    ]},
+    {t:'Med adherence + goals get built first -> the plan can’t exist without them', d:'8/31', s:'open', x:`
+      <p>Jay: <i>"without medication adherence and goals, you can't really create a treatment plan, so those come first."</i> Kelly's framing for Greg: <i>"when we say the treatment plan will be done, we're not like will be the first thing we work on. It's the elements that go into the treatment plan that are actually being developed first."</i></p>
+      <p>Jay also raised a resourcing fork nobody closed: <i>"I guess we'll have to ask him to pick between caregiver and treatment plan."</i> Greg's 9/1 answer was implicit rather than stated: <i>"Yuehui get past this and get on with the one I want, which is the goal and lifestyle plan."</i> Decided in practice, never decided out loud.</p>`},
+    {t:'$599 per-plan provider fee came off the order form', d:'9/1', s:'open', x:`
+      <p>Kelly had it as "lifestyle treatment plan selected by practice user", a flat rate per patient the provider activated it for. Greg killed it live: <i>"Why is that on his order form?"</i> ... <i>"That disincents him from turning on patients."</i> Kelly: <i>"Let me take this out then."</i> The patient premium requirement stays.</p>
+      <p>The acceptance criterion he gave you at the end of the walkthrough is worth pinning above the mockup: <i>"This software is going to be a whole lot easier to sell if we can prove that they can, with little work on their side, make more money."</i> Judge every screen against that sentence.</p>`},
+    {t:'Billing codes still unverified -> gates the provider-review half of the feature', d:'9/1', s:'blocked', note:'Kelly is still assembling the code list.', x:`
+      <p>Greg: <i>"Have you confirmed that he could actually charge for the preventative plan?"</i></p>
+      <p>Kelly's status: obesity and weight management look billable by a physician or clinical staff with no special credentials; diabetes education requires a registered dietitian; assessment and nutrition codes are probably already being billed so they come off; prevention counseling codes she is still adding. Greg's filter: <i>"look at those that we don't believe he's billing. It does not require him to be a licensed dietitian."</i></p>
+      <p>This gates the provider-review half. It does not gate the Orion-drafted half, which is why Jay's don't-overbuild rule exists.</p>`},
+    {t:"Call it the preventative treatment plan -> Greg decided, billing needs the word", d:'9/8', s:'open', x:`
+      <p>Greg's first words on the design: <i>"I don't want to call it a treatment plan. Let's call it preventative treatment plan… We need word preventative in here, right?"</i> You: <i>"Okay. Yes, that's good, actually."</i></p>
+      <p>Settles the naming line from 8/25 and the billing requirement behind it.</p>`},
+    {t:"Conditions and immediate treatment requirements go on top, above the goals -> Greg: \"I've got four alerts: calcium, red blood count, platelets, glucose\"", d:'9/8', s:'next', x:`
+      <p>The change Greg pushed hardest, and he said it three times before it landed. <i>"it would seem to me you'd want to generate first the medical issues that they got to worry about that are treatments… the known treatment requirements… This is a necessity, and then goals are over and above that."</i></p>
+      <p>Then, when it didn't land: <i>"you miss my question. It needs to start with what's the thing. What's the problem. So the problem is I've got four alerts: calcium, red blood count, platelets, and glucose levels, and it should then say, and I also have additional goals other than that."</i></p>
+      <p><b>His definition of the page's name:</b> <i>"there should be a summary real quick of what are the immediate treatment requirements that you have that you can't ignore. That's why it's a preventative treatment plan — because you have preventative steps to make sure you don't have a problem, and then you have problems you also have to take care of."</i></p>
+      <p>Confirmed: you said <i>"It will be on the top. The condition."</i> Greg: <i>"Perfect."</i></p>`, kids:[
+      {t:"Split known from projected -> \"one more lab and I'll be pre-diabetic\" is a requirement, not a goal", d:'9/8', s:'open', x:`
+        <p>Greg: <i>"the dashboard would say, what are all my medical requirements to be met, both known and projected? So projected is one more lab, and I'll be pre-diabetic at the rate I'm going."</i></p>
+        <p>Same mechanism as the 8/25 wrong-direction-trend line — a projection is a requirement, not a goal, and it sits in the top block.</p>`}
+    ]},
+    {t:"Provider sets the high-level goals, patient builds the detail with Orion -> mark which tier each row came from", d:'9/8', s:'next', x:`
+      <p>Decided. Greg: <i>"He should be able to say, here's your high-level plan. Create the detailed plan that we can monitor."</i> And: <i>"the doctor set that as a goal, and a goal is to lose how many pounds. And then on the patient side, it gives different options for diet programs to lose that weight."</i></p>
+      <p>Kelly's restatement, which he confirmed with <i>"right"</i>: <i>"the doctor initiates the goals and signs off on them. The details of how the patient achieves those goals is curated by the patient."</i> Her summary of the whole shape: <i>"provider initiated and Orion curated with patient input. So there's three kind of legs of the tool."</i></p>
+      <p>Your own read-back, accepted: <i>"start point is still from provider, and then the detail will push to the patient and Orion side on the mobile app, so the patient can create underneath the provider verified high level goal."</i></p>`, kids:[
+      {t:"Diet is the model: doctor says lose 10 lbs and rules out the caveman diet, patient picks balanced or low carb", d:'9/8', s:'open', x:`
+        <p>Greg: <i>"the doctor goes through and says you need to lose 10 pounds. You can do that through a balanced diet… or you can do with a low carb diet, and the patient should be saying which one I want to go on, but it should also say you cannot do the caveman diet… All three are weight loss programs, but one of them creates huge problems based on his medical record, the other two do not."</i></p>
+        <p>So a row carries three things: a provider-set target, a set of allowed methods, and an explicitly forbidden one. That last part is new and it has no component yet.</p>`},
+      {t:"Patient preferences have to reach the provider at goal creation, not after", d:'9/8', s:'open', x:`
+        <p>Kelly: <i>"If the provider is recommending a low carb diet or a high protein diet, but the patient is plant based and may struggle to maintain that, we need to make sure the provider knows… as long as the information's there when the provider creates it, that may impact the goal the provider is creating. But the how-to would be later with the patient."</i></p>
+        <p>This is the half of the preference question that does need UI — on the provider side, at creation time. See Q4 in the questions file.</p>`}
+    ]},
+    {t:"Provider snapshot on desktop is the sign-off gate -> Greg withheld sign-off for this and nothing else", d:'9/8', s:'next', x:`
+      <p>The most important thing to come out of 9/8. Kelly asked <i>"Do you want to sign off on this direction? Do you want to see it again?"</i> and he answered <i>"Well, the only thing I'm still missing is that single snapshot. This is just a lot of setup stuff, right?"</i></p>
+      <p><b>His ask, in full:</b> <i>"Is there a single dashboard for the next meeting with the doctor that shows the goals, the plan objectives that he set, and then the measurements that the user set up compared to the planned outcomes. One single dashboard to just quick snapshot of — I give you a plan, you fulfilled the details of the plan, you've been working actively towards the plan, and here's where you're at right now."</i> And: <i>"One single view… The doctor's just going to see a quick snapshot."</i></p>
+      <p>Kelly pointed at the existing home-page card and he rejected it: <i>"The snapshot is on the left on the home page. Your treatment plan with Dr. Irene Medina — that's the single snapshot"</i> → <i>"Well, it still doesn't appear to me that you really have set…"</i></p>
+      <p><b>His bar for the copy:</b> <i>"This is what I told you to do. Here's how well you're doing it. And just saying 'stable' isn't going to cut it."</i> His critique of the metrics row as drawn: <i>"I don't really know, other than I have X number of steps and I eat X number of carbs… if you're on a no carb diet, better not be eating 72 grams of carbs. No carb diets are less than 20 carbs a day."</i></p>`, kids:[
+      {t:"One view: known + projected medical requirements, personal goals, out-of-line labs then vs now, symptoms resolved, outcomes against the plan", d:'9/8', s:'open', x:`
+        <p>Assembled from his own list: <i>"what are all my medical requirements to be met, both known and projected"</i>; <i>"personal goals that you added in, better sleep, workout, diet"</i>; <i>"you've brought back the labs on only things that are out of line, and when you come back, it's comparing what it was for what it is, and you may be projecting off of that"</i>; <i>"it should also include the symptoms to see whether the symptoms have gone away"</i>; <i>"it should show the outcomes against the plan, but also the outcomes against the insight. So if you're going this way on glucose, when he comes back in, it better have gone down."</i></p>`},
+      {t:"\"Just saying stable isn't going to cut it\" -> doctor reads it in clinical speak on a computer, patient gets a smaller version", d:'9/8', s:'open', x:`
+        <p>The constraint that makes this a separate build: <i>"you're limiting yourself to the phone here. The real dashboard that I'm talking about is for the provider to review how the patient is done with all this data already being in his snapshot that's going to run on the computer. May have a smaller version for the patient… the doctor wants to see it in clinical speak anyway."</i></p>
+        <p>So it is a provider desktop surface, not a phone screen — which is why Q2 in the questions file asks whether it ships with v1 or after.</p>`}
+    ]},
+    {t:"Restructure the top level to progress-to-goal -> Kelly: the doctor doesn't need my step count, he needs am I following diet and exercise and did I lose the weight", d:'9/8', s:'next', x:`
+      <p>Kelly's reframe, and it is the one that makes Greg's ask affordable: <i>"maybe we can rethink those categories we talked about last time and do it from a progress to goal perspective. So if my goals are to lose weight, I don't really need to know how many steps I took. Am I following my diet and exercise programs? Meaning, I'm eating healthy and exercising X days a week, and I've lost Y pounds. Maybe that's all the doctor needs to know… that's the high-level monitoring progress to goal. But all the stuff you have in there is great because that's the click-through detail."</i></p>
+      <p><b>Nothing you drew gets thrown away</b> — the six category cards move down a level and the top becomes goal → adherence → outcome.</p>`, kids:[
+      {t:"The six category cards become the click-through detail, not the top level", d:'9/8', s:'open', x:`
+        <p>Kelly's words: <i>"all the stuff you have in there is great because that's the click-through detail."</i> This is also consistent with the 8/25 rule that the entry surface answers "am I on track today" without opening a category.</p>`},
+      {t:"Symptom check at the top -> \"has my hip pain resolved\", ties to the how-am-I-feeling screens Kelly sent", d:'9/8', s:'open', x:`
+        <p>Kelly: <i>"at the top, it might be a symptom like, has my hip pain resolved? And that might come back to the screenshots I sent you on how am I feeling today… then we're just tracking to that — symptoms resolved or lessening would be the monitoring piece that the patient and provider would see on the one pager summary."</i></p>
+        <p>Greg's version, from his knee: <i>"the doctor would want to know how is the knee, right? Did it work?"</i> Patient-reported, four states, no clinical scoring.</p>`}
+    ]},
+    {t:"v1 evaluation is pass-through, not a C4P scoring engine -> Greg: steal Apple, seven-day averages, \"I don't care whether you calculate in our system\"", d:'9/8', s:'open', x:`
+      <p>You raised the build cost twice and got no scoping decision either time. First: <i>"I want to confirm what I'm understanding from Greg's perspective. So that means we need to move further, like have a tracking or even evaluation system… because I just intentionally removed the specific tracking system for each category, because I assume it needs a lot of time to build underneath."</i> He cut in with <i>"all of the detail is necessary"</i> — a scope expansion, not an answer.</p>
+      <p>Second: <i>"how can we evaluate your overall sleep, and beyond that we need to evaluate how did you do to target your treatment plan goal… we need to map on the different evaluation."</i></p>
+      <p><b>The two things he actually said, both of which read as permission:</b> <i>"I think you just steal Apple. So Apple gives you average sleep over seven days. Apple gives you average workout attainment over seven days… I would just grab that same information and convey it."</i> And: <i>"I don't care whether you calculate in our system. I'm just suggesting that they average everything for you."</i></p>
+      <p>Kelly, whom you asked directly (<i>"I don't know, Kelly, if you have any thoughts on that. Like, how can we start?"</i>), redirected to Jay and Portu instead of answering. Q3 in the questions file carries the written default: seven-day averages for activity and sleep, adherence % for meds, then-vs-now for labs, patient-reported for symptoms, nothing else.</p>`, kids:[
+      {t:"Start from meds, the daily log data already exists", d:'9/8', s:'open', x:`
+        <p>Your own proposed starting point, unanswered in the room: <i>"probably start with the meds, because meds we have the goal and we prepare for the daily log, so we have the data to contribute to the tracking and evaluation system."</i> It is also Jay's current dev task, so it is the one category where the data is real.</p>`}
+    ]},
+    {t:"Fix the adherence numbers -> 80% overall has to reconcile with 95% daily dose before the demo", d:'9/8', s:'next', x:`
+      <p>Kelly, in the design review: <i>"the med overall number of 80% should match the everyday, every dose number of 95% adherence. So those should be the same, right?"</i> and <i>"if it doesn't match in the demo, that could be confusing."</i></p>
+      <p>Your read: the 80% is since-plan-start and the 95% is daily. Either reconcile them or label both explicitly on the card.</p>`},
+    {t:"\"Recommend\" becomes \"consider\" -> Orion is not the doctor", d:'9/8', s:'next', x:`
+      <p>Kelly: <i>"instead of recommend, can you say consider? … we're getting away from Orion is the doctor, and this is for the provider and the patient — talk to your doctor about, versus would you consider."</i> Applies across the plan copy on both sides.</p>`},
+    {t:"Preference tag, not a preference editor -> Jay: preferences live in Orion memory, \"we don't have to change anything here\"", d:'9/8', s:'open', x:`
+      <p>Jay opened with preferences as the gap — <i>"if I wanted to say that I don't do strength training, I only do cardio, then the strength goal should be adapted"</i>, and <i>"Greg keeps saying the preference in terms of diet, that he hates cauliflower, and if Orion says eat cauliflower, then he wouldn't like it"</i> — then reversed himself and landed somewhere better:</p>
+      <p><i>"all the preferences are not associated to the treatment plan. The preferences are associated to Orion and users, Orion chat history. So whenever Orion generates this draft plan, it should have already considered the preference… and we don't have to change anything here."</i></p>
+      <p>His residual idea, which does imply UI: <i>"maybe it's a user preference tag that we use across the board, and therefore Orion makes the decision based on that user preference."</i> That tag on the affected row is the minimum design, and it is the default written into Q4.</p>
+      <p>Greg's version of the requirement: <i>"You can tell me asparagus is all low carb and it's good for you, and I'll tell you to go screw yourself… You want me to get out of the program altogether? Tell me I have to eat Brussels sprouts."</i></p>`},
+    {t:"Catch-all provider field for what the six categories miss -> pain management, procedures, PT; patient marks aligned or not aligned", d:'9/8', s:'open', x:`
+      <p>Greg's case: <i>"entire practices that are nothing but pain management that do different types of cortisone shots… you go into an appointment at a doctor's office for a shot. They put you under for these shots. These are not medications you take at home."</i> Jay wanted it filed under medications; Greg refused. His scope warning: <i>"you're basically taking orthopedic off the table if you don't add in pain management and physical therapy."</i></p>
+      <p>Closed in favour of a custom field. Jay: <i>"the simplest thing I can think of is adding a custom field for the provider, a custom category that the patient can track on their own, and they can say whether they are aligned to it or not aligned to it."</i> Greg: <i>"I think custom one's no brainer."</i></p>
+      <p><b>Kelly dissented and still intends to test the alternative</b> — the EMR's existing treatment-plan field — because <i>"for any office that's already using that field, they'd want us to take it from there… You don't want to change their workflow unnecessarily."</i> Jay: <i>"We don't even get that data clearly, so I don't want to depend on that. I wouldn't even trust that."</i> So the field may have two sources; design it source-agnostic.</p>`, kids:[
+      {t:"PT combines with workout later, workout first", d:'9/8', s:'open', x:`
+        <p>Greg: <i>"We can just combine workout and physical therapy into supporting both workout programs you do at home and physical therapy programs you do away from home."</i> Jay: <i>"we can definitely combine physical therapy with workout at some point, but we have to start with workout first."</i></p>`}
+    ]},
+    {t:"Labs and check-in cadence belong in the plan -> standing order for labs before the next visit, meeting frequency", d:'9/8', s:'open', x:`
+      <p>Greg wants the plan to issue the next lab order: <i>"maybe put in the preventative plan — prior to every next meeting you rerun your labs so that you get a fresh, updated picture of those outcomes."</i> And: <i>"the monitoring can't just be what we get off the watch. It really needs to be also against lab results. So part of the doctor's requirements are: what are the labs, and what is the time frame that you're going to run that test prior to my next appointment."</i></p>
+      <p>Why he cares: <i>"that flips the entire doctor's process on its ear in a very positive way. Instead of talking to me about the next symptoms and determining whether I should go run some labs — it's already got all the goals, already knew what it was trying to accomplish, and already ran the labs. And now I'm spending all my time reviewing outcomes and tweaking the requirements."</i></p>
+      <p>Plus cadence: <i>"maybe part of the plan should also have a level of frequency to meet with the doctor"</i> → Kelly: <i>"Check-ins, and they can be virtual or in person."</i> Same shape as the 8/31 labs-as-a-goal-with-a-cadence line.</p>
+      <p>Also raised and parked: significant alerts to the provider — <i>"your watch catches your AFib would be something the doctor wants to know about"</i> — which Kelly put on the messaging roadmap while asking for your design thoughts.</p>`},
+    {t:"Six categories are ratified -> medication, sleep, activity, nutrition, screenings, vaccines, and Jay's build list matches", d:'9/8', s:'open', x:`
+      <p>Worth recording because it is the part that did not get relitigated. Jay's build list: <i>"we start with workout, sleep, medication adherence. What was the other one? Screenings and vaccine recommendations. Those are the five things"</i> plus Greg's <i>"And dietary"</i> → <i>"And dietary recommendations. Yes."</i></p>
+      <p>Kelly on the draft overall: <i>"this is on track from a high level."</i> Jay: <i>"No questions… this looks good."</i> And his standing objection, which is an argument in your favour: <i>"all of this is in some form or manner already there in the app. Now we are just showing it in a different way."</i></p>`},
+    {t:"Base can't see the plan, premium can see an Orion-generated one without a provider -> contradicts provider-initiated, nobody reconciled it", d:'9/8', s:'blocked', note:"Q1 in Design-Questions-2026-09-08.md.", x:`
+      <p>The contradiction, forty minutes apart. Greg on the paywall: <i>"in order for us to guarantee these premium upgrades, they don't get to see the prevention plan on their side if they don't have the premium"</i>, and <i>"if they don't sign up to the service, they won't be able to see the plan on their side. They'll only be able to review it with you next time they come to the office."</i> Jay: <i>"If they have the premium, can they see it even if they didn't get it from a provider?"</i> → Greg: <i>"Yeah."</i> → Jay: <i>"Okay, so it will be flagged as generated by Orion."</i></p>
+      <p>Then at 1:03 the agreed flow was <i>"start point is still from provider."</i> Both cannot be v1's entry point.</p>
+      <p>Note Jay relayed this as <b>your</b> question at the top of the meeting — <i>"the one question that Yuehui brought up today was: do we show the treatment plan even if a provider doesn't actually prescribe it, as a draft treatment plan from Orion, or do we only show it to the patient if it comes from a provider? That's a question I guess we need to answer first, Greg"</i> — and the answer that came back was about money, not verification. Q1 in the questions file.</p>`},
+    {t:"Workout and recipe programs pulled in and customised to the record -> Greg's V Shred pitch", d:'9/8', s:'pause', x:`
+      <p>Greg, well past v1: <i>"we can also call in a customized workout program. Be great if they sign into our app every morning and use it to do the workout program with it."</i> And: <i>"I really want a link that allows us to pull in diet books, recipes by day, workout programs, both of which has some logic to customize it based on the medical record of that patient."</i></p>
+      <p>His competitive claim: <i>"with Connect for Patients and V Shred, you have the only customized workout program on the market. Customized directly to your medical conditions."</i> Kelly's cheaper interim: <i>"they just link to their Peloton and that updates their goals for now because we have basic goals."</i></p>
+      <p>Stays paused, same as the 8/24 third-party content line.</p>`}
+  ]},
+  {title:'Prototype — Claude design', accent:'var(--secondary)', src:'Added 8/11.', items:[
+    {t:'Build the mobile patient app in the Claude design prototype, from the Figma screens', d:'8/11', s:'open', x:`
+      <p>The parent. Rebuild the patient app as a working prototype in the Claude design environment, screens sourced from the Figma file rather than redrawn.</p>
+      <ul>
+        <li><b>Scope the screens first.</b> From your old note: check the Demo session's Kelly user flow to see which screens are actually involved. Build that set, not the whole app.</li>
+        <li><b>Capture route.</b> The process already exists in this folder — the Figma capture playbook, plus figma-match-check for verifying the prototype against the source frames.</li>
+        <li><b>Why it matters.</b> It gives the provider prototype a real patient-side counterpart, so provider ↔ patient behavior can be demoed end to end instead of described.</li>
+      </ul>
+      <p>Restates a line from the old manual list that I wrongly dropped as done: <i>"build the patient app prototype on the Claude design, check Demo session's Kelly's user flow to see the involved screens."</i></p>
+      <p class="files">Claude - Figma Screen Capture Playbook.md · Figma Capture — Quick Start (Humans).md · figma-match-check.html · Dashboard Testing/ · DailyHealthTracker/ · OrionVoiceMode/</p>`, kids:[
+      {t:'Build the json file to mock the live sync between provider app and patient app', d:'8/11', s:'open', ghost:true, x:`
+        <p><b>A ghost task, not a sub-task.</b> It runs alongside the parent: it doesn't wait for the patient app prototype to exist, and it doesn't pause when the parent pauses. That's the distinction — a sub-task rides along with its parent's status, a ghost task keeps its own.</p>
+        <p>One real-patient-like profile JSON that both the Provider app and the Patient app read, so a change on one side shows up on the other without a backend. That's the "live sync" being mocked.</p>
+        <p><b>Open questions to settle while building it:</b></p>
+        <ul>
+          <li><b>Shape</b> — one file, or split per domain (meds, labs, conditions, wellness)?</li>
+          <li><b>Who writes</b> — does the provider side write and the patient side read, or both?</li>
+          <li><b>How the sync is simulated</b> — shared in-memory state, polling a file, a fake event?</li>
+          <li><b>What has to round-trip</b> — meds and adherence, verification / correction state, data groups pushed from the provider side, Orion's view of the same record.</li>
+        </ul>
+        <p>Use the same category vocabulary as the rest of the system — see the LOINC mapping and the full-data column inventory under B2B, even though that one is paused. If the JSON invents its own field names, the full-data tab and the prototype drift apart.</p>`}
+    ]},
+    {t:'Build the caregiver screens as a clickable prototype -> a lot of new entry points, need to check every button', d:'8/25', s:'next', x:`
+      <p>Distinct from the parent line above — caregiver-only, and driven by a need you named at the end of the design review: <i>"I'm also planning to build the prototype on the cloud design, so we can have a better review of the Caregiver's screens… there's a lot of new entry points, so I need to check every button or interaction is correct."</i></p>
+      <p>The point is interaction verification, not visual fidelity. The caregiver work has added entry points in several places at once — network tab, homepage add button, connected-person dashboard, access management, the two request flows, the mode banner on half a dozen screens — and a static set of frames cannot show whether they all connect.</p>
+      <p>This is also the artifact Greg walks through on Tuesday.</p>`}
+  ]},
+  {title:'B2B — Provider Dashboard', accent:'var(--warning)', src:'Meeting Fri 2026-08-07, paused 8/10. Live again from Fri 2026-09-04 — Portu’s pilot runs against this UI.', items:[
+    {t:'Full data sort & filter columns -> new tab in the logic / code Excel: every category, every table, every column, and for each column sort / filter / both + how', d:'8/7', s:'pause', note:'Not the priority for now.', x:`
+      <p><b>Status:</b> the 8/7 meeting gave this a concrete deliverable, which briefly un-paused it. Back on hold as of 8/10 — caregiver is the live block. Spec kept intact so it can be picked up as-is. The three sub-tasks are paused with it.</p>
+      <p>Deliverable is a <b>new tab in the existing logic / code Excel workbook</b> (Kelly's), not a separate doc. One source of truth for full-data mode in the provider app:</p>
+      <ul>
+        <li>every category (conditions, medications, labs, etc.)</li>
+        <li>every table within each category</li>
+        <li>every column in each table</li>
+        <li>per column: <b>sort</b>, <b>filter</b>, or <b>both</b> — and <i>how</i> (what the sort order means, what the filter operates on)</li>
+      </ul>
+      <p>Ties to full-data decisions already made: the three-tier sort model and what a user sort may / may not override; select mode carried in the sticky header, one expand and never a stepper; the per-row "+" split and the rule that a lens filters but never arms a push. Those are behavioral rules — this tab is the column-level inventory underneath them.</p>`, kids:[
+      {t:'Map each element to a category from Kelly’s Excel where it fits; flag the ones that don’t', d:'8/7', s:'open', x:`
+        <p>Best-effort mapping, imperfect is fine. The value is in the exceptions: anything that doesn't map cleanly gets flagged so special rules can be defined later.</p>
+        <p><b>Watch out:</b> the LOINC category source file has 7 real categories, needs 2 columns for the UI, and has ~20 defects already catalogued. Check that before assuming a category list is clean.</p>`},
+      {t:'Small UI snippets per column -> how sort shows (arrow), how filter is picked (chip, dropdown, text search)', d:'8/7', s:'open', x:`
+        <p>Small visuals, not full screens. Per table / column: what the sort control looks like (up / down arrow states) and what the filter affordance is — chips, dropdown, text search, range, etc.</p>`},
+      {t:'Link the snippets to the rows so Jay and Kelly can review in one place', d:'8/7', s:'open', x:`
+        <p>Attach or link each visual to its corresponding row / column in the Excel tab. The point is reviewability: Jay and Kelly read a row and see the intended control without hunting through a separate file.</p>`}
+    ]},
+    {t:"Show the provider what the patient is and isn't sharing -> Kelly put it on me for phase two or three", d:'9/4', s:'next', x:`
+      <p>Jayanth raised the gap: <i>"we will have to share the same thing with the provider also somehow, on what the patient is sharing. So maybe we might have to think about the UI for that. Like, how do we show the provider what the patient is sharing and not sharing?"</i> Kelly assigned it: <i>"based on the demos, the providers are gonna want to see this"</i> → <i>"so UHI will need to add that to the provider like phase two or three feature updates."</i></p>
+      <p>Why it's urgent for her: she has been telling providers the wrong thing. <i>"we've already gotten questions, and actually I've been saying it wrong… I said you'd have access to a DEXA scan or a bio report or an image or whatever. So I didn't realize."</i></p>
+      <p><b>Governing frame for this whole block:</b> Portu's pilot runs against this UI, and Jayanth wants the feedback triaged — <i>"what is something that you can't live without versus what is a nice to have. And then we can start acting on what you can't live without."</i> Kelly folded that into the Portu SOW as a testing protocol.</p>`, kids:[
+      {t:"Two problems, not one: a document center in the provider UI, and the sharing state itself", d:'9/4', s:'open', x:`
+        <p>Jayanth split it and it should stay split: <i>"that's two things, right? One, document center in provider UI — that's its own UI update. Then there is, what is the patient sharing UI in the provider UI also. So two things we might have to figure out."</i></p>
+        <p>The document center is the next line. This line is the sharing state — the provider-side mirror of the patient permission screen, including the "Used by Orion Answers Only" distinction.</p>`}
+    ]},
+    {t:"Providers want the actual source document, not the extracted care plan -> health system documents and patient uploads both", d:'9/4', s:'next', x:`
+      <p>Kelly, twice, the second time with a count: <i>"It's been more than one provider that really wants to see the actual document. I need to see the source"</i>, then <i>"pretty much every demo I've done, at least the last couple weeks, they wanted to see the documents… they want to see the actual document, whether it's pulled from the health system or something the patient uploaded."</i></p>
+      <p>The gap: a provider can ask Orion for a care plan and get the extracted content, but can't reach the document it came from. <i>"maybe we have to think through that, Yuehi, from a UI perspective down the road."</i> On the patient side the Library is what she demos; the provider has no equivalent.</p>
+      <p>Partly addressed already, which makes this a design pass rather than a new feature: <i>"It shows the excerpt that was used to answer that question, and then if you click on View Document, it'll show the actual document also."</i> But <i>"the citations part is not completely built out yet."</i></p>
+      <p class="files">orion-source-peek-panel-wireframes.html · orion-source-types-wireframes-v1.html · source-display-patterns-ai-products.html</p>`, kids:[
+      {t:"Orion answers already show document sources and View Document, citations aren't built out", d:'9/4', s:'open', x:`
+        <p>Outstanding against your existing spec. Jayanth: <i>"I know Yue had inline citations in her UI. That part is not fully built out yet… initially I want to bring in inline citations for web search sources."</i> Current state: <i>"you see those dangling markers on top, like where it says five in the answer. Those need to be actual links… you will see those numbers, but they might not map to anything yet."</i></p>
+        <p>Nothing new to design — a build-completeness gap worth tracking because demos show it. Kelly on the demo value: <i>"This is awesome, Jay. I literally just did a demo where I described this… and the docs was thrilled."</i></p>`}
+    ]},
+    {t:"Patient updates color coding -> drop the per-category colours since the feed mixes categories", d:'9/4', s:'open', x:`
+      <p>Jayanth's flag, addressed straight to you: <i>"each one of them has a different color code, right? The medication change has a different color code, allergy change has a different color code, condition has a different color code, on all the patient updates. I don't know if you want to think through that."</i></p>
+      <p>Your call, unchallenged: <i>"I think if in the patient updates we mix cross categories, probably I will just remove the color coding for the patient updates."</i></p>`, kids:[
+      {t:"Kelly's worry: red was the only priority signal for the provider, watch the pilot feedback", d:'9/4', s:'open', x:`
+        <p>The original intent was priority, not category. Kelly: <i>"initially the patient updates was red because we were thinking maybe it needed to stand out to the providers. Like, pay attention to this, because this is what your patient changed."</i> And: <i>"otherwise, there's nothing like red in here as like a priority thing."</i></p>
+        <p>So removing colour removes the only urgency signal on the provider dashboard. Either something else carries urgency, or this comes back after pilot feedback. Check against status tokens either way — green already means in range, and Jayanth separately wants <i>"bright green"</i> for provider-reviewed plans.</p>`}
+    ]},
+    {t:"No detail view anywhere in the provider UI except reports -> decide where a detail view lands", d:'9/4', s:'open', x:`
+      <p>Jayanth, thinking out loud while deciding where diagnostic reports go: <i>"reports has a detail view, right? It always has a detail view. We don't have a detail view for any of the components right now in provider UI, which they might start asking for. So that's another thing that we'll have to keep thinking about. Like, where does the detail view land?"</i> On observations: <i>"you can click through the observation data to go into observation detail also. That I think is needed."</i></p>`, kids:[
+      {t:"Documentation reuses the document reviewer, single-data detail isn't finished on mobile either", d:'9/4', s:'open', x:`
+        <p>Your answer, accepted: <i>"for the documentation, we can just use the document reviewer, that kind of component. But the data detail — I know that even on our mobile app right now, we didn't finish the detail page for the single data."</i></p>
+        <p>Half-solved on documents, unsolved on single data values, on both platforms. Doing it once for both is the opportunity.</p>
+        <p class="files">provider-detail.html · data-verification-prototype.html</p>`}
+    ]},
+    {t:"Category column on the provider labs table -> Jay is adding it, it references the sub tab", d:'9/4', s:'open', x:`
+      <p>Your ask, agreed in the meeting. He had brought the patient-side lab groupings into the provider UI as filters: <i>"the same categories that we have on the patient side, I had these as grouping filters. You didn't have this in UI, but I think this makes sense, because if the provider says I don't know why metabolism includes A1C, that gives us enough feedback to say okay, maybe we should change this on the patient side also."</i></p>
+      <p>You: <i>"is it possible to add one column for the labs and call it the category, so they can have some mapping?"</i> — clarified as <i>"the column is just a reference to this sub tab."</i> Jayanth: <i>"we can add a column also, but I thought this was simpler."</i> → <i>"Perfect."</i></p>`, kids:[
+      {t:"Provider feedback on the groupings comes back to the patient side so the two stay in sync", d:'9/4', s:'open', x:`
+        <p>The reason it matters beyond the provider table — provider feedback is free validation of the patient-side categories. Jayanth: <i>"I included these so that we can map any feedback from provider and update it on the patient side also, so that we are in sync."</i> The LOINC crosswalk showing up again.</p>`}
+    ]},
+    {t:"Suggested question pills: Kelly wants one click, I want the review step -> going to Portu testing instead of a redesign", d:'9/4', s:'blocked', note:"Waiting on Portu pilot feedback.", x:`
+      <p>A design decision that was challenged and held. Kelly: <i>"I like that these are here, but it takes a lot of space of the answer, and then now the pills make me click it twice… Is this a UI thing that Yuehui can work on?"</i></p>
+      <p>Jayanth defended it first: <i>"we are not showing the full question, we are showing half the question. So if you click it, you show the full question. How do they know the full question if they don't?"</i> Then your rationale: <i>"I want the user to at least check and review the question they want, and also they can add more information if they want. So it's not one click to send the question."</i> That's the fill-don't-send decision already on record for Orion chips.</p>
+      <p>Kelly accepted a test rather than a redesign: <i>"we'll just test it. So when I'm creating the statement of work with the test components, we'll add these types of details for feedback from Portu."</i> Her residual concern is space, not clicks: <i>"it's just hard when we get a long answer… there's just not a lot of space for it."</i></p>
+      <p><b>Don't pre-emptively redesign it.</b></p>`, kids:[
+      {t:"Jay is widening the Orion chat box so the pills sit horizontal and the answer gets the space", d:'9/4', s:'open', x:`
+        <p>Your proposal, his build: <i>"can we make the Orion chat box a little bit wider? Then the pills will not just be in one vertical line, it can be the horizontal layout, so we'll release more space for the text."</i> Jayanth: <i>"I can increase the size of the width."</i></p>
+        <p>Web only — Kelly checked: <i>"this is only on web currently, right, Jay? So we don't have to worry about a mobile layout."</i></p>`}
+    ]},
+    {t:"Diagnostic reports land in Full Data for now -> Jay's interim call before the release", d:'9/4', s:'open', x:`
+      <p>Decided in the meeting and shipped the same day: <i>"that's the only one that I think I'll add today before I release it to production"</i> and <i>"I'll just keep it in the full data for now, and we'll see if there is another way to get through it."</i></p>
+      <p>Other provider-side changes from the same release: meds removed from the dashboard timeline (<i>"we haven't decided on what we will show on meds here, so I removed the meds here"</i>), and the meds category swapped for out-of-range labs to match the patient side.</p>
+      <p>Nothing to design — it's the fact to design against, and the reason the detail-view question above came up.</p>`}
+  ]},
+  {title:'Provider — Patient', accent:'var(--secondary)', src:'Meeting Fri 2026-08-07.', items:[
+    {t:'Jay may build the minimal patient–provider messaging himself -> stay aligned, don’t block on it', d:'8/7', s:'open', x:`
+      <p>Priority call from the meeting: messaging is Jay's to build if he wants it, your focus stays on caregiver UX. The only obligation is alignment — see the caregiver messaging line.</p>`},
+    {t:'Prescription refills -> a requirement for replacing a portal', d:'9/1', s:'open', x:`
+      <p>New on 9/1, and it arrived attached to a deal. Greg's prospect wants to drop his portal vendor and use C4P instead: <i>"his ultimate plan is he'd like to replace his portal with us"</i>, and <i>"he says 70% of his patients use the portal, so that should get us much higher conversion rate to premium."</i></p>
+      <p>Greg: <i>"If we're going to start replacing portals, we have to be able to refill prescriptions."</i> Kelly's constraint is the same shape as appointments: <i>"we're connected to a partner, we can add anything that they send us, but we don't have that"</i> today.</p>
+      <p>So it is a partner-data dependency before it is a screen. Nothing to design until Jay says the data can come in.</p>`},
+    {t:"Base patient access lasts as long as the provider contract, not 90 days -> check the paywall and expiry states and copy", d:'9/4', s:'open', x:`
+      <p>A rule change with UI consequences. Kelly settled it: <i>"the patient's base access lasts as long as the provider's contract is in place. That's what we tell them"</i>, and the part that touches design: <i>"they should not need to get another code or refresh it."</i></p>
+      <p>So the 90-day expiry states go away, and with them any copy about re-entering a code or refreshing access. What replaces them is an edge case nobody has designed: what a patient sees if the provider's contract ends.</p>
+      <p class="files">paywall-trial-ended-wireframe.html · orion-free-tier.html · invite-access-flows-v1-v2.html</p>`},
+    {t:"Add picture / attach file in the chat box -> Greg's ChatGPT gap, supplement label photo, has to work on mobile for patients", d:'9/8', s:'next', x:`
+      <p>Greg's framing is competitive, not incremental: <i>"if anybody else runs into anything else you can do in ChatGPT you can't do in Orion, you need to bring that up. If they have to leave our system to go to ChatGPT, it's never going to work. We need to make sure they never have to leave our system."</i></p>
+      <p>The specific failure: <i>"Orion couldn't tell me whether this particular mental clarity drug worked. ChatGPT took a picture of it and immediately told me what all the ingredients were and which ones were useful, which ones weren't."</i></p>
+      <p>Jay identified it as backlog item 15, <i>"take a picture of supplement"</i> — the same item the supplement research feature maps to. Kelly: <i>"Yuehui might need to take a look at that with Jay and make sure the feature works on mobile for patients."</i></p>`, kids:[
+      {t:"I have an old add-button design, review and upgrade it with Jay", d:'9/8', s:'open', x:`
+        <p>Your words: <i>"I have an old design with the add button or other stuff you can add in this chat box, but I can review that and probably we need to upgrade that."</i></p>
+        <p><b>Scope note:</b> Greg does not want a button for its own sake — <i>"I don't even know if you need to make it a button. All you do on ChatGPT is you just copy the picture and put it in the question bar."</i> On mobile that means camera / photo / file straight from the composer, not a separate flow. He put the alternative-medicine commerce idea behind it as <i>"a dot one release after you get the base system out"</i>, and Kelly marked the whole thing <i>"a next priority for now."</i></p>`}
+    ]}
+  ]},
+  {title:'Meds — add, schedule, log, tracking', accent:'var(--sky)', src:'Carried from the manual list (Sept 2025 onward).', items:[
+    {t:'Make the FHIR code and the user-end input mapping.', s:'open', x:`
+      <p>Map FHIR <code>Timing</code> structures to what the user actually types and taps. From your diagram:</p>
+      <p><b>Timing.repeat — three groups of fields</b></p>
+      <ul>
+        <li><b>How often</b> — frequency / frequencyMax, period / periodMax, periodUnit (s · min · h · d · wk · mo · a). More than 4 weeks turns to mo.</li>
+        <li><b>When</b> — semantic code + set time: timeOfDay (clock time), dayOfWeek, offset (minutes from the event).</li>
+        <li><b>How long</b> — bounds[x] (start date, end date optional), count / countMax, duration / durationUnit (length of one dose).</li>
+      </ul>
+      <p><code>Timing.code</code> carries the same meaning as shorthand: BID · TID · QD · QOD · Q4H · Q6H.</p>
+      <p><b>Clock-anchored</b> (FHIR event-timing, abstract parts of the day): MORN (early / late), NOON (around 12:00), AFT, EVE, NIGHT, PHS (after falling asleep, + offset). Each is defined as "exact time unspecified, established by institution convention or patient interpretation." C4P's morning / noon / evening groups map here, with auto-mapping from the exact time to the code.</p>
+      <p><b>Event-anchored</b> (HL7 v3 TimingEvent, relative to an event): sleep — WAKE (on waking), HS (at bedtime). Meals are a grammar, not a flat list. Prefix = relation, suffix = which meal: C / CM / CD / CV, AC / ACM / ACD / ACV, PC / PCM / PCD / PCV, IC / ICM / ICD / ICV. (C cibus/meal · M matutinus/morning · D diurnus/midday · V vespertinus/evening · AC ante cibum · PC post cibum · IC inter cibum.)</p>
+      <p class="files">schedule-picker-spec.html · adherence-window-labeling.html</p>`},
+    {t:'Celebration animation -> try the full screen design', s:'open', x:`
+      <p>The open move is the full-screen variant rather than the inline / card celebration.</p>
+      <p class="files">day-celebration-explorations.html · day-closes-check-polish.html · day-complete-illustration-layout.html · log-all-motion-spec.html</p>`}
+  ]},
+  {title:'User Profile', accent:'var(--success)', src:'Carried from the manual list.', items:[
+    {t:'Emphasize the health ID / C4P account that user can share with other people.... even maybe combined with the health hub', s:'open', x:`
+      <p>The idea: the C4P account is itself a shareable health identity, and that might belong in the health hub rather than buried in profile settings.</p>
+      <p class="files">share-health-data-mockup.html · share-data-v2-v3-compare.html · patient-consent-wireframes.html</p>`}
+  ]}
+];
+
+let filter = 'all';
+let allBtn = null;
+function syncAllBtn(){
+  if (allBtn) allBtn.textContent = flat.some(i => i.open) ? 'Collapse all' : 'Expand all';
+}
+const flat = [];
+DATA.forEach(sec => sec.items.forEach(it => {
+  it.done = false; flat.push(it);
+  (it.kids||[]).forEach(k => { k.done = false; k.parent = it; flat.push(k); });
+}));
+
+const list = document.getElementById('list');
+const bar  = document.getElementById('bar');
+
+function stateOf(it){ return it.done ? 'done' : it.s; }
+function matches(it){
+  if (filter === 'all') return true;
+  if (filter === 'done') return it.done;
+  return !it.done && it.s === filter;
+}
+
+function selectEl(it){
+  const wrap = document.createElement('span');
+  wrap.className = 'status';
+  const sel = document.createElement('select');
+  for (const [k,v] of Object.entries(STATUS)){
+    const o = document.createElement('option');
+    o.value = k; o.textContent = v.label; sel.appendChild(o);
+  }
+  const doneOpt = document.createElement('option');
+  doneOpt.value = 'done'; doneOpt.textContent = 'Done'; sel.appendChild(doneOpt);
+  sel.value = stateOf(it);
+  sel.className = 's-' + sel.value;
+  sel.setAttribute('aria-label','Status');
+  sel.onchange = () => {
+    if (sel.value === 'done'){ it.done = true; }
+    else { it.done = false; it.s = sel.value; }
+    render();
+  };
+  wrap.appendChild(sel);
+  return wrap;
+}
+
+const CARET = '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">' +
+              '<path d="M3 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+              'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function rowEl(it, isChild){
+  const item = document.createElement('div');
+  item.className = 'item' + (isChild ? ' child' : '') + (it.ghost ? ' ghost' : '') +
+                   (it.done ? ' is-done' : '') + (it.open ? ' open' : '');
+  // sub-tasks ride along with a paused / blocked / dropped parent; ghost tasks never do
+  if (it.parent && !it.ghost && RIDE_ALONG.includes(it.parent.s) && !it.parent.done) item.classList.add('muted');
+  if (!matches(it)) item.classList.add('hidden');
+
+  const row = document.createElement('div');
+  row.className = 'row';
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox'; cb.checked = it.done;
+  cb.setAttribute('aria-label','Mark done');
+  cb.onchange = () => { it.done = cb.checked; render(); };
+  row.appendChild(cb);
+
+  const body = document.createElement('div');
+  body.className = 'body';
+  const txt = document.createElement('span');
+  txt.className = 'txt';
+  txt.innerHTML = (it.ghost ? '<span class="par">⇢ parallel</span>' : '') +
+                  it.t.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                      .replace(/-&gt;|->/g,'<span class="arrow">→</span>');
+  if (it.d){
+    const tag = document.createElement('span');
+    tag.className = 'tag'; tag.textContent = it.d; txt.appendChild(tag);
+  }
+  body.appendChild(txt);
+  if (it.note){
+    const n = document.createElement('span');
+    n.className = 'note'; n.textContent = it.note; body.appendChild(n);
+  }
+  row.appendChild(body);
+  row.appendChild(selectEl(it));
+
+  const toggle = () => {
+    it.open = !it.open;
+    item.classList.toggle('open', it.open);
+    car.setAttribute('aria-expanded', it.open);
+    syncAllBtn();
+  };
+  const car = document.createElement('button');
+  car.className = 'caret'; car.innerHTML = CARET;
+  car.setAttribute('aria-expanded', !!it.open);
+  car.setAttribute('aria-label','Show detail');
+  car.onclick = toggle;
+  if (!it.x) car.style.visibility = 'hidden';
+  else txt.onclick = toggle;
+  row.appendChild(car);
+
+  item.appendChild(row);
+
+  if (it.x){
+    const det = document.createElement('div'); det.className = 'detail';
+    const clip = document.createElement('div'); clip.className = 'clip';
+    const bd = document.createElement('div'); bd.className = 'dbody'; bd.innerHTML = it.x;
+    clip.appendChild(bd); det.appendChild(clip); item.appendChild(det);
+  }
+  return item;
+}
+
+function render(){
+  // filter bar
+  const counts = {all: flat.length, done: flat.filter(i=>i.done).length};
+  Object.keys(STATUS).forEach(k => counts[k] = flat.filter(i=>!i.done && i.s===k).length);
+  bar.innerHTML = '';
+  const order = ['all','next','doing','open','pause','blocked','dropped','done'];
+  order.forEach(k => {
+    if (k !== 'all' && counts[k] === 0 && filter !== k) return;
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.setAttribute('aria-pressed', filter === k);
+    b.innerHTML = (k==='all' ? 'All' : (k==='done' ? 'Done' : STATUS[k].label)) +
+                  '<span class="n">' + counts[k] + '</span>';
+    b.onclick = () => { filter = k; render(); };
+    bar.appendChild(b);
+  });
+  const sp = document.createElement('span'); sp.className = 'spacer'; bar.appendChild(sp);
+  allBtn = document.createElement('button');
+  allBtn.className = 'btn';
+  allBtn.onclick = () => {
+    const open = !flat.some(i => i.open);
+    flat.forEach(i => { if (i.x) i.open = open; });
+    render();
+  };
+  bar.appendChild(allBtn);
+  syncAllBtn();
+  const exp = document.createElement('button');
+  exp.className = 'btn primary'; exp.textContent = 'Copy as markdown';
+  exp.onclick = openExport; bar.appendChild(exp);
+
+  // sections
+  list.innerHTML = '';
+  DATA.forEach(sec => {
+    const s = document.createElement('section');
+    const head = document.createElement('div');
+    head.className = 'sec-head';
+    const a = document.createElement('span');
+    a.className = 'accent'; a.style.background = sec.accent; head.appendChild(a);
+    const h = document.createElement('h2'); h.textContent = sec.title; head.appendChild(h);
+    const c = document.createElement('span'); c.className = 'count';
+    const total = sec.items.reduce((n,i)=>n+1+(i.kids?i.kids.length:0),0);
+    const done  = sec.items.reduce((n,i)=>n+(i.done?1:0)+(i.kids?i.kids.filter(k=>k.done).length:0),0);
+    c.textContent = done + '/' + total; head.appendChild(c);
+    s.appendChild(head);
+
+    const rows = document.createElement('div'); rows.className = 'rows';
+    let shown = 0;
+    sec.items.forEach(it => {
+      const r = rowEl(it,false); rows.appendChild(r);
+      if (!r.classList.contains('hidden')) shown++;
+      (it.kids||[]).forEach(k => {
+        const kr = rowEl(k,true); rows.appendChild(kr);
+        if (!kr.classList.contains('hidden')) shown++;
+      });
+    });
+    s.appendChild(rows);
+    if (shown === 0) s.classList.add('empty');
+    list.appendChild(s);
+  });
+}
+
+function mdLine(it, indent){
+  const box = it.done ? '[x] ' : '';
+  const par = it.ghost ? '⇢ **parallel** — ' : '';
+  let line = indent + '- ' + box + par + it.t + (it.d ? ' (' + it.d + ')' : '');
+  if (!it.done && STATUS[it.s].marker) line += ' - **' + STATUS[it.s].marker + '**';
+  if (it.note) line += ' ' + (it.done ? '' : '') + '<!-- ' + it.note + ' -->';
+  return line;
+}
+
+function openExport(){
+  const out = ['# Design To-Do — Yuehui',''];
+  out.push('Rolling. New tasks go under a section after each meeting. Date tag = which meeting it came from.');
+  out.push('Status: Open · Next · Doing · Pause · Blocked · Dropped. `[x]` = done.');
+  out.push('`-` under a line = sub-task, rides along with its parent. `⇢ parallel` = ghost task, runs alongside, doesn’t wait.');
+  out.push('Longer context for any line lives in `Design-TODO-detail.md` — ask Claude, don’t fill it in here.');
+  out.push('','---','');
+  DATA.forEach(sec => {
+    out.push('## ' + sec.title, '');
+    sec.items.forEach(it => {
+      out.push(mdLine(it,''));
+      (it.kids||[]).forEach(k => out.push(mdLine(k,'  ')));
+    });
+    out.push('');
+  });
+  document.getElementById('md').value = out.join('\n');
+  dlg.showModal();
+}
+
+document.getElementById('copyBtn').onclick = async () => {
+  const ta = document.getElementById('md');
+  try { await navigator.clipboard.writeText(ta.value); }
+  catch(e){ ta.removeAttribute('readonly'); ta.select(); document.execCommand('copy'); ta.setAttribute('readonly',''); }
+  const b = document.getElementById('copyBtn');
+  b.textContent = 'Copied'; setTimeout(()=>b.textContent='Copy',1400);
+};
+
+render();
+</script>
+</body>
+</html>

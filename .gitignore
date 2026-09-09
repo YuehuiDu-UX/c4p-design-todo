@@ -1,0 +1,13 @@
+# Whitelist repo: ignore everything in this folder by default,
+# then re-admit only the design to-do files. This keeps the
+# prototypes, spreadsheets, and Word docs out of the repo while
+# letting the .git directory live in the working folder.
+
+*
+!.gitignore
+!README.md
+!Design-TODO.md
+!Design-TODO-detail.md
+!Design-TODO-Shared.md
+!design-todo.html
+!make-shared-todo.py
