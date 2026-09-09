@@ -224,6 +224,21 @@
     border-top:1px solid var(--border);align-items:center}
   .dlg-foot .hint{flex:1;font-size:12px;color:var(--text-tertiary)}
   footer{margin-top:var(--sp-l);font-size:12px;color:var(--text-tertiary);line-height:1.6}
+  .saved{
+    display:flex; align-items:center; gap:var(--sp-s);
+    font-size:12px; color:var(--text-tertiary);
+    margin:0 0 var(--sp-s); padding:var(--sp-xs) var(--sp-s);
+    border:1px dashed var(--border); border-radius:var(--r-s);
+    background:var(--surface-sunken);
+  }
+  .saved .grow{flex:1; line-height:1.5}
+  .saved button{
+    font:inherit; color:var(--text-secondary); cursor:pointer; white-space:nowrap;
+    background:var(--surface); border:1px solid var(--border-strong);
+    border-radius:var(--r-s); padding:3px var(--sp-xs);
+  }
+  .saved button:hover{color:var(--text-primary); border-color:var(--text-tertiary)}
+  .saved.warn{border-style:solid; border-color:var(--warning)}
 </style>
 </head>
 <body>
@@ -249,12 +264,14 @@
 </div>
 
 <div class="bar" id="bar"></div>
+<div class="saved" id="saved" hidden></div>
 <main id="list"></main>
 
 <footer>
   <b>Sub-tasks</b> sit under their parent and ride along: pausing, blocking or dropping the parent dims them.
   A <b>ghost task</b> (<span class="par" style="vertical-align:0">&#8674; parallel</span>) runs alongside instead &mdash; it keeps its own status and doesn't dim when the parent stalls.<br>
-  Checkbox state lives in this page only, so it resets on reload. Copy the markdown out before you close it.
+  Your statuses, checkmarks and open rows are saved in this browser, on this machine only &mdash; they survive a reload but travel nowhere.
+  <code>Design-TODO.md</code> in the repo is still the source of truth, so copy the markdown out and hand it back when you're done triaging.
 </footer>
 
 </div>
@@ -1063,9 +1080,89 @@ function syncAllBtn(){
 }
 const flat = [];
 DATA.forEach(sec => sec.items.forEach(it => {
-  it.done = false; flat.push(it);
-  (it.kids||[]).forEach(k => { k.done = false; k.parent = it; flat.push(k); });
+  it.done = false; it.sec = sec.title; flat.push(it);
+  (it.kids||[]).forEach(k => { k.done = false; k.sec = sec.title; k.parent = it; flat.push(k); });
 }));
+// status as it came from Design-TODO.md, so we only persist what differs from the file
+flat.forEach(it => { it._s0 = it.s; });
+
+/* ---- local state, this browser only -------------------------------------
+   Keyed on section + line text: reordering the list keeps your marks, and
+   rewording a line drops them, because a reworded task is a different task.
+   Nothing leaves this machine. Design-TODO.md remains the source of truth. */
+const SKEY = 'c4p-design-todo:v1';
+const keyOf = it => it.sec + '|' + it.t;
+let lastSaved = null;
+let storeOK = true;
+try { localStorage.setItem(SKEY + ':probe', '1'); localStorage.removeItem(SKEY + ':probe'); }
+catch(e){ storeOK = false; }
+
+function loadState(){
+  if (!storeOK) return null;
+  try {
+    const raw = localStorage.getItem(SKEY);
+    if (!raw) return null;
+    const st = JSON.parse(raw);
+    if (!st || st.v !== 1) return null;
+    const m = st.items || {};
+    flat.forEach(it => {
+      const r = m[keyOf(it)];
+      if (!r) return;
+      if (r.done) it.done = true;
+      if (r.s) it.s = r.s;
+      if (r.open) it.open = true;
+    });
+    if (st.filter) filter = st.filter;
+    return st.ts || null;
+  } catch(e){ return null; }
+}
+
+function saveState(){
+  if (!storeOK) return;
+  const items = {};
+  flat.forEach(it => {
+    if (it.done || it.s !== it._s0 || it.open){
+      items[keyOf(it)] = {done: !!it.done, s: it.s, open: !!it.open};
+    }
+  });
+  try {
+    localStorage.setItem(SKEY, JSON.stringify({v:1, ts:new Date().toISOString(), filter:filter, items:items}));
+    lastSaved = new Date();
+  } catch(e){ storeOK = false; }
+  paintSaved();
+}
+
+function paintSaved(){
+  const el = document.getElementById('saved');
+  if (!el) return;
+  el.hidden = false;
+  el.className = 'saved' + (storeOK ? '' : ' warn');
+  el.innerHTML = '';
+  const txt = document.createElement('span');
+  txt.className = 'grow';
+  if (!storeOK){
+    txt.innerHTML = 'This browser will not keep state for a local file, so your marks reset on reload. ' +
+                    'Chrome and Firefox will; Safari will not. Copy the markdown out before you close the tab.';
+    el.appendChild(txt);
+    return;
+  }
+  const changed = flat.filter(i => i.done || i.s !== i._s0).length;
+  const when = lastSaved ? lastSaved.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : null;
+  txt.innerHTML = 'Saved in this browser' + (when ? ' at ' + when : '') + ' &middot; ' +
+                  (changed ? changed + ' line' + (changed === 1 ? '' : 's') + ' differ from Design-TODO.md'
+                           : 'nothing changed from Design-TODO.md yet');
+  el.appendChild(txt);
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = 'Reset to file';
+  btn.title = 'Discard what this browser saved and reload the list exactly as Design-TODO.md has it';
+  btn.onclick = () => {
+    if (!confirm('Discard the statuses and checkmarks saved in this browser and reload the list as written in Design-TODO.md?')) return;
+    try { localStorage.removeItem(SKEY); } catch(e){}
+    location.reload();
+  };
+  el.appendChild(btn);
+}
 
 const list = document.getElementById('list');
 const bar  = document.getElementById('bar');
@@ -1093,6 +1190,7 @@ function selectEl(it){
   sel.onchange = () => {
     if (sel.value === 'done'){ it.done = true; }
     else { it.done = false; it.s = sel.value; }
+    saveState();
     render();
   };
   wrap.appendChild(sel);
@@ -1117,7 +1215,7 @@ function rowEl(it, isChild){
   const cb = document.createElement('input');
   cb.type = 'checkbox'; cb.checked = it.done;
   cb.setAttribute('aria-label','Mark done');
-  cb.onchange = () => { it.done = cb.checked; render(); };
+  cb.onchange = () => { it.done = cb.checked; saveState(); render(); };
   row.appendChild(cb);
 
   const body = document.createElement('div');
@@ -1144,6 +1242,7 @@ function rowEl(it, isChild){
     item.classList.toggle('open', it.open);
     car.setAttribute('aria-expanded', it.open);
     syncAllBtn();
+    saveState();
   };
   const car = document.createElement('button');
   car.className = 'caret'; car.innerHTML = CARET;
@@ -1178,7 +1277,7 @@ function render(){
     b.setAttribute('aria-pressed', filter === k);
     b.innerHTML = (k==='all' ? 'All' : (k==='done' ? 'Done' : STATUS[k].label)) +
                   '<span class="n">' + counts[k] + '</span>';
-    b.onclick = () => { filter = k; render(); };
+    b.onclick = () => { filter = k; saveState(); render(); };
     bar.appendChild(b);
   });
   const sp = document.createElement('span'); sp.className = 'spacer'; bar.appendChild(sp);
@@ -1187,6 +1286,7 @@ function render(){
   allBtn.onclick = () => {
     const open = !flat.some(i => i.open);
     flat.forEach(i => { if (i.x) i.open = open; });
+    saveState();
     render();
   };
   bar.appendChild(allBtn);
@@ -1262,7 +1362,10 @@ document.getElementById('copyBtn').onclick = async () => {
   b.textContent = 'Copied'; setTimeout(()=>b.textContent='Copy',1400);
 };
 
+const _ts = loadState();
+lastSaved = _ts ? new Date(_ts) : null;
 render();
+paintSaved();
 </script>
 </body>
 </html>
