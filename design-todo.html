@@ -246,7 +246,7 @@
 
 <header>
   <h1>Design To-Do</h1>
-  <p class="sub"><b>9/8 done — Greg did not sign off on the plan.</b> He withheld it for one reason: the provider-facing snapshot. Second review agreed, undated, Kelly to schedule. Jay's two-week build starts at sign-off, so the revision is the critical path. Greg also wants the reports tab first because the pilots need it. Open questions that blocked me: <code>Design-Questions-2026-09-08.md</code>.</p>
+  <p class="sub"><b>9/8 done — Greg did not sign off on the plan.</b> He withheld it for one reason: the provider-facing snapshot. Second review agreed, undated, Kelly to schedule. Jay's two-week build starts at sign-off, so the revision is the critical path. <b>Order decided 9/9: reports first, then the plan.</b> Phased plan of attack in <code>Design-Roadmap-PreventativePlan-v1.md</code> — five of the six open questions get answered by drawing them, not by waiting. Questions and decisions: <code>Design-Questions-2026-09-08.md</code>.</p>
   <p class="sub" style="margin-top:6px">Rolling. <code>Design-TODO.md</code> is still the source of truth &mdash; this is the view. Set a status, tick what's done, then <strong>Copy as markdown</strong> and hand it back to me to save. Open the arrow on any line for the detail behind it.</p>
 </header>
 
@@ -591,6 +591,24 @@ const DATA = [
       <p>Kelly also caught that the out-of-range labs dev task was staged wrongly: <i>"out of range labs, which should not be ready for dev actually, because you haven't completed the design."</i></p>`}
   ]},
   {title:'Treatment Plan / Lifestyle Plan', accent:'var(--secondary)', src:'Born in Greg\u2019s pricing / product meeting 2026-08-24, reinterpreted in the caregiver review + team weekly 2026-08-25. Full extraction: C4P_TreatmentPlan_Requirements-Brief_v1.md. First pass due Tuesday with caregiver.', items:[
+    {t:"Phase 0: write the metric contract -> one table, per category, what v1 shows and what it's compared to, this is my answer on evaluation", d:'9/9', s:'next', x:`
+      <p>The artifact that replaces waiting for an answer on evaluation. Per category: the v1 metric, where the number comes from, and what it is compared against. Adherence % from the med log, seven-day averages from Apple Health / Health Connect for activity and sleep, then-vs-now on labs, patient-reported for symptoms, overdue / scheduled / done for screenings and vaccines.</p>
+      <p>Greg said <i>"steal Apple"</i> and <i>"I don't care whether you calculate in our system."</i> This table is taking that permission. It is also what Jay needs in order to build, and it is the thing that makes the argument concrete if anyone does want a real evaluation system later.</p>
+      <p class="files">Design-Roadmap-PreventativePlan-v1.md (B0.1)</p>`},
+    {t:"Phase 0: spec the goal row once -> target, method, provenance, forbidden method, preference tag, current value", d:'9/9', s:'next', x:`
+      <p>Turns the two-tier authorship decision into a component instead of a conversation. Provider sets the target, patient picks the method from the allowed set, the row carries where each part came from (provider / Orion / patient / EMR standard) plus a preference tag where Orion memory has one.</p>
+      <p class="files">Design-Roadmap-PreventativePlan-v1.md (B0.2)</p>`, kids:[
+      {t:"Forbidden method has no component today -> Greg's caveman diet case needs one", d:'9/9', s:'open', x:`
+        <p>Greg: <i>"it should also say you cannot do the caveman diet… All three are weight loss programs, but one of them creates huge problems based on his medical record."</i> A ruled-out option, visible on the row, with the reason. Nothing in the system does this yet.</p>`}
+    ]},
+    {t:"Phase 0: draw both plan states -> Orion-drafted unreviewed, and provider-reviewed, so the entry-point question stops blocking me", d:'9/9', s:'next', x:`
+      <p>Greg answered the entry-point question both ways on 9/8, forty minutes apart. Drawing both is the only honest response and it unblocks the work: unreviewed carries the disclaimer and no attribution, reviewed carries the attribution line, verified marks on provider-set rows, and a review date.</p>
+      <p>In the review it becomes the one question left for him: <b>which one does v1 open with?</b> Either answer, the frames already exist.</p>
+      <p class="files">Design-Roadmap-PreventativePlan-v1.md (B0.3)</p>`},
+    {t:"Phase 0: write the v1 cut line down -> what's deliberately out and what each one waits on, so it stops coming back every meeting", d:'9/9', s:'next', x:`
+      <p>One line each for: evaluation engine, provider drag-and-drop builder, multiple plans and the plans list, conflict reconciliation, workout / recipe ingestion, image generation, patient-facing preference editor, PT as its own category, provider alerts and messaging. Each with what it depends on.</p>
+      <p>Shown at the end of the review, so closed questions stay closed.</p>
+      <p class="files">Design-Roadmap-PreventativePlan-v1.md (B0.4)</p>`},
     {t:'Design the first-pass one-page plan view from Vitality data, and recommend where it lives', d:'8/25', s:'next', x:`
       <p>Kelly's assignment, verbatim: <i>"why don't you mock something up of what the one pager would look like, and then we'll go with where it goes… You suggest where the treatment plan button or view goes, and then we go from there."</i></p>
       <p><b>What it is:</b> a holistic plan across inside health, care and lifestyle, generated from Vitality data, reviewed and adjusted by a provider, then tracked day to day. Jayanth: <i>"at the end of the day, we are using Vitality data."</i> The loop is Orion generates, provider reviews and adjusts, patient sees it and can influence it, provider tracks adherence.</p>

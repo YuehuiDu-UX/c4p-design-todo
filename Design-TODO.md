@@ -8,7 +8,7 @@ Longer context for any line lives in `Design-TODO-detail.md` — ask Claude, don
 
 **9/8 done. Greg did NOT sign off on the plan** — he withheld it for one reason, the provider-facing snapshot. A second review is agreed but undated (Kelly to schedule). Jay's two-week build starts at sign-off, so the revision is the critical path.
 
-Greg also said the reports tab is the first thing to do because the pilots need it. Three things are calling themselves the current priority: reports tab, plan revision, chat-box picture upload. Open questions that blocked me are in `Design-Questions-2026-09-08.md`.
+**Order decided 9/9: reports tab first, then the plan.** The phased plan of attack is `Design-Roadmap-PreventativePlan-v1.md` — I answer five of the six open questions myself by drawing them instead of waiting. The questions and what I decided are in `Design-Questions-2026-09-08.md`.
 
 Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to priority four on 9/8.
 
@@ -193,6 +193,14 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - $599 per-plan provider fee came off the order form -> Greg: it disincents him from turning on patients (9/1)
 - Billing codes still unverified -> gates the provider-review half of the feature (9/1) - **Blocked**
 ### From the 9/8 design review + Greg meeting
+
+**Phase 0 — decide on paper first (9/9):**
+
+- Write the metric contract -> one table, per category, what v1 shows and what it's compared to, this is my answer on evaluation (9/9) - **Next**
+- Spec the goal row once -> target, method, provenance, forbidden method, preference tag, current value (9/9) - **Next**
+  - Forbidden method has no component today -> Greg's caveman diet case needs one (9/9)
+- Draw both plan states -> Orion-drafted unreviewed, and provider-reviewed, so the entry-point question stops blocking me (9/9) - **Next**
+- Write the v1 cut line down -> what's deliberately out and what each one waits on, so it stops coming back every meeting (9/9) - **Next**
 
 - Call it the preventative treatment plan -> Greg decided, billing needs the word (9/8)
 - Conditions and immediate treatment requirements go on top, above the goals -> Greg: "I've got four alerts: calcium, red blood count, platelets, glucose" (9/8) - **Next**
