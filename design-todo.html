@@ -1112,6 +1112,14 @@ const SKEY = 'c4p-design-todo:v1';
 const keyOf = it => it.sec + '|' + it.t;
 let lastSaved = null;
 let storeOK = true;
+
+/* ---- shared state, saved next to Design-TODO.md -------------------------
+   todo-marks-server.py, running on this Mac, writes what you tick here into
+   todo-marks.json in this folder. That file is what the weekday morning
+   check-in reads, so ticking a box here IS the check-off. localStorage stays
+   on as the fallback for when the little server is not running. */
+const SYNC = 'http://127.0.0.1:8765/marks';
+let syncOK = null;   // null unknown, true writing to the folder, false browser only
 try { localStorage.setItem(SKEY + ':probe', '1'); localStorage.removeItem(SKEY + ':probe'); }
 catch(e){ storeOK = false; }
 
@@ -1143,10 +1151,43 @@ function saveState(){
       items[keyOf(it)] = {done: !!it.done, s: it.s, open: !!it.open};
     }
   });
+  const payload = {v:1, ts:new Date().toISOString(), filter:filter, items:items};
   try {
-    localStorage.setItem(SKEY, JSON.stringify({v:1, ts:new Date().toISOString(), filter:filter, items:items}));
+    localStorage.setItem(SKEY, JSON.stringify(payload));
     lastSaved = new Date();
   } catch(e){ storeOK = false; }
+  push(payload);
+  paintSaved();
+}
+
+// Hand the marks to the local server so they land in todo-marks.json.
+function push(payload){
+  fetch(SYNC, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)})
+    .then(r => { if (syncOK !== r.ok){ syncOK = r.ok; paintSaved(); } })
+    .catch(() => { if (syncOK !== false){ syncOK = false; paintSaved(); } });
+}
+
+// On load the folder's copy wins over whatever this browser remembers, so the
+// same marks show up in every browser and survive a move to another machine.
+async function pullState(){
+  try {
+    const r = await fetch(SYNC, {cache:'no-store'});
+    if (!r.ok) throw new Error('no endpoint');
+    const st = await r.json();
+    syncOK = true;
+    const m = (st && st.items) || {};
+    flat.forEach(it => {
+      it.done = false; it.s = it._s0; it.open = false;
+      const saved = m[keyOf(it)];
+      if (!saved) return;
+      if (saved.done) it.done = true;
+      if (saved.s) it.s = saved.s;
+      if (saved.open) it.open = true;
+    });
+    if (st && st.filter) filter = st.filter;
+    if (st && st.ts) lastSaved = new Date(st.ts);
+    render();
+  } catch(e){ syncOK = false; }
   paintSaved();
 }
 
@@ -1166,7 +1207,10 @@ function paintSaved(){
   }
   const changed = flat.filter(i => i.done || i.s !== i._s0).length;
   const when = lastSaved ? lastSaved.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : null;
-  txt.innerHTML = 'Saved in this browser' + (when ? ' at ' + when : '') + ' &middot; ' +
+  const where = syncOK === true  ? 'Saved to the C4P folder, the morning check-in reads this'
+              : syncOK === false ? 'Saved in this browser only, the local save server is not running'
+              : 'Saved in this browser';
+  txt.innerHTML = where + (when ? ' at ' + when : '') + ' &middot; ' +
                   (changed ? changed + ' line' + (changed === 1 ? '' : 's') + ' differ from Design-TODO.md'
                            : 'nothing changed from Design-TODO.md yet');
   el.appendChild(txt);
@@ -1177,7 +1221,9 @@ function paintSaved(){
   btn.onclick = () => {
     if (!confirm('Discard the statuses and checkmarks saved in this browser and reload the list as written in Design-TODO.md?')) return;
     try { localStorage.removeItem(SKEY); } catch(e){}
-    location.reload();
+    fetch(SYNC, {method:'POST', headers:{'Content-Type':'application/json'},
+                 body:JSON.stringify({v:1, ts:new Date().toISOString(), filter:filter, items:{}})})
+      .catch(()=>{}).then(()=>location.reload());
   };
   el.appendChild(btn);
 }
@@ -1384,6 +1430,7 @@ const _ts = loadState();
 lastSaved = _ts ? new Date(_ts) : null;
 render();
 paintSaved();
+pullState();
 </script>
 </body>
 </html>
