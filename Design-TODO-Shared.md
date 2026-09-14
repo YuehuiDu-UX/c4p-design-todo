@@ -250,7 +250,6 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 - Build the mobile patient app in the Claude design prototype, from the Figma screens (8/11)
   - ⇢ **parallel** — Build the json file to mock the live sync between provider app and patient app (8/11)
-- Build the caregiver screens as a clickable prototype -> a lot of new entry points, need to check every button (8/25) - **Next**
 
 ## B2B — Provider Dashboard
 
@@ -295,4 +294,4 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 ---
 
-_Generated 2026-09-14 14:12 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
+_Generated 2026-09-14 14:25 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
