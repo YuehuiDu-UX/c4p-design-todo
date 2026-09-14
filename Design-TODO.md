@@ -12,6 +12,8 @@ Longer context for any line lives in `Design-TODO-detail.md` — ask Claude, don
 
 Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to priority four on 9/8.
 
+**9/11: the plan entry point is settled, and so is the reports grouping.** Orion always generates the plan — the provider generate button is the trigger for a base patient, a premium patient gets one automatically like vitality — and only the provider edits it in v1. Reports group as out of range / new / past with no date rule. Jay builds meds and goals first, health hub after.
+
 ---
 
 ## Caregiver — Patient App
@@ -83,12 +85,20 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 ## Health Bio & Stats
 
 - Create an abnormal / out-of-range group in stats -> everything outside normal range at the top, separate from the category groups (8/25) - **Next**
-  - Solve the duplicates -> an out-of-range lab also sits inside its category group (8/25)
+  - Duplicates settled 9/11 -> let the out-of-range lab sit in its category group too, least dev work and there is no category filter yet to justify the other way (8/25, 9/11)
   - Projections and trends run on the out-of-range items too, not only the categorised ones (8/25)
   - Link stats and the diagnostic report so an out-of-range value can't be missed on either side (8/25)
 - Health Hub as the other home for the abnormal data -> the dashboard of things to look at (8/25)
 - Also flag the values trending the wrong way while still in range -> glucose is Greg's example, feeds the plan (8/25)
 - Fasting vs. non-fasting glucose gets misclassified so the trend splits -> may need a user edit, Kelly is checking the codes first (9/4) - **Blocked**
+- Compact active-records block on the health hub -> the dense one-page version I drew is not readable, show counts and let the button carry them into the tab (9/11) - **Next**
+- Decide whether out of range belongs on health bio at all -> if the list runs long it needs a compact form or it does not go there (9/11)
+- Merge the confirm-health-bio content into the permanent health bio page -> date of birth, gender, blood type, tobacco; the today's-to-do page is temporary and then disappears (9/11)
+  - Height and weight edit in place from the hub, Jay will wire the direct edit -> health bio still has to stay discoverable for everything else on it (9/11)
+- Body map comes off the list view -> list is the default, the entry point stays in health bio, the click stays premium (9/11)
+- Mini trend graph stays simple, the abnormal-range visualisation goes in the full graph (9/11)
+  - Kelly wants every out-of-range point marked as well as the ring on the current one -> full version only (9/11)
+- Drop "entered in error" as a user-facing label -> give each item a status tag that means something (9/11)
 
 ## Reports
 
@@ -98,12 +108,17 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Radiology report is a quick fix and ugly -> needs a design pass (8/25)
 - Anatomy visual -> Orion generates a picture of what the radiology report describes, then the plan hangs off it (8/25)
 - Surface new and out-of-range labs on the reports tab -> review the tab first, I didn't design it (9/4) - **Next**
-  - Three things: abnormal on top with a date-range rule, new, and an "other" bucket for what isn't grouped (9/4)
+  - Settled 9/11: out of range on top, then new, then past -> no date-range rule and no other bucket (9/4, 9/11)
   - Has to beat the patient portal -> "you've got a new test" is the one thing portals do well (9/4)
   - No push for non-partner systems -> the indicator has to carry it without a notification (9/4)
   - Jay is adding observations read-only into Review your records on every refresh (9/4)
   - Map the EMR's "final" status to normal / abnormal in patient language (9/4)
   - A report is a collection -> the lipid panel carries all its observations, an imaging study is one thing (9/4)
+  - Renamed 9/11: needs focus becomes out of range on the reports tab -> Jay: needs focus implies a time rule, out of range is just your current value (9/11)
+  - Out of range is driven off observation stats -> Jay pulls the diagnostic reports behind whatever is out of range there, no date logic in v1 (9/11)
+  - New means it arrived on a refresh -> a first sync is not new, everything else is past reports (9/11)
+  - Needs focus keeps the timing, the goal and the treatment plan, and stays with vitality (9/11)
+  - Report detail needs a provider-notes line for when we have doctor notes -> my notes is the patient's (9/11)
 - Orion generates the image when an imaging report has no picture -> Greg's ask, only MRI / X-ray / CT, patient first, keep it open for the provider (9/4) - **Pause**
   - Nothing to design against yet -> Kelly can't see her own mammogram, Sutner may be the only system sending images (9/4)
 - Images as their own class in the UI -> a mammogram shouldn't sit under tests and procedures, Jay says diagnostic report is the right home (9/4) - **Pause**
@@ -135,16 +150,16 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
   - Scope plan stats to the plan period, not the calendar month, and store the baseline (8/31)
   - Ended plans should say what happened -> that's where before / after lives (8/31)
   - Mark needs a short plan label, a "2 plans" count, and a Mine state (8/31)
-- Premium vs. base for the plan is still open -> Kelly and Jay don't agree (8/25) - **Blocked**
+- Premium vs. base settled 9/11 -> everyone who has a plan sees it, premium buys the Orion drill-down: recipes, workout programs, any ask (8/25, 9/11)
 - Greg's page content, top to bottom: goals, then treatment / diet / workout / meds under each, then the key lab and radiology problems (8/24)
   - Every goal needs a target, a timeline, and a starting point so the trend has a baseline (8/24)
   - Before / after framing -> what's your current, what do you want your after to be (8/24)
   - Drill-down goes to the screens we already have -> Vitality keeps scanning everything, the plan only measures what was agreed (8/24)
 - Provider builds the plan on desktop with the dashboard's drag-and-drop framework -> assembled on the fly per patient (8/24)
   - Patient side displays and inputs, doesn't configure -> no dashboard building on mobile in the first release (8/24)
-  - Whether the patient ever rearranges their own plan is Jay's open item -> parked behind my first pass (8/24)
+  - Whether the patient ever rearranges their own plan -> closed 9/11, they do not, not in v1 (8/24, 9/11)
   - Kelly's mobile alternative -> select / pin instead of drag and drop (8/24)
-  - Patient edits inputs, not layout -> weight, which of two prescriptions they actually take, "I don't like broccoli" (8/24)
+  - Patient edits inputs, not layout -> overtaken 9/11, v1 has no patient editing at all; this is the list for later (8/24, 9/11)
   - Symptoms that resolve drop off the plan on their own (8/24)
 - Plan gets amended at every visit -> add and subtract items, show what we agreed vs. what you did (8/24)
   - Provider's pre-visit summary of the plan, and a treatment plan link in visit essentials (8/24)
@@ -216,6 +231,7 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
   - Symptom check at the top -> "has my hip pain resolved", ties to the how-am-I-feeling screens Kelly sent (9/8)
 - v1 evaluation is pass-through, not a C4P scoring engine -> Greg: steal Apple, seven-day averages, "I don't care whether you calculate in our system" (9/8)
   - Start from meds, the daily log data already exists (9/8)
+  - Narrowed 9/11: pass-through means our own 30-day averages against the goal, not Apple's evaluation -> Jay: a condition can mean more sleep or less (9/11)
 - Fix the adherence numbers -> 80% overall has to reconcile with 95% daily dose before the demo (9/8) - **Next**
 - "Recommend" becomes "consider" -> Orion is not the doctor (9/8) - **Next**
 - Preference tag, not a preference editor -> Jay: preferences live in Orion memory, "we don't have to change anything here" (9/8)
@@ -223,8 +239,29 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
   - PT combines with workout later, workout first (9/8)
 - Labs and check-in cadence belong in the plan -> standing order for labs before the next visit, meeting frequency (9/8)
 - Six categories are ratified -> medication, sleep, activity, nutrition, screenings, vaccines, and Jay's build list matches (9/8)
-- Base can't see the plan, premium can see an Orion-generated one without a provider -> contradicts provider-initiated, nobody reconciled it (9/8) - **Blocked**
+- Settled 9/11: Orion generates for every premium patient automatically, the provider generate button covers base patients, and the patient sees the plan either way (9/8, 9/11)
 - Workout and recipe programs pulled in and customised to the record -> Greg's V Shred pitch (9/8) - **Pause**
+
+### From the 9/11 team meeting
+
+- Orion always generates the plan -> two triggers only: the provider clicks generate for a base patient, or the patient is premium and it generates automatically like vitality (9/11)
+  - The provider sees the same plan either way and does not need to know the patient's tier (9/11)
+  - A premium patient with no provider can still show theirs to a doctor afterwards (9/11)
+- v1 has no patient editing at all -> not even premium; the patient sees the plan and their progress, the provider is the only editor (9/11) - **Next**
+  - Pushback on a goal goes nowhere in v1 -> Orion can say build up to it, the number does not move (9/11)
+  - Park the list of what a patient will eventually be able to change -> a note on a goal is the likely first one (9/11)
+- Unreviewed plans carry a visible AI disclaimer -> drafted by Orion, not reviewed by your provider, review it before you follow it (9/11) - **Next**
+- "Reviewed with patient" control on the provider side -> confirmed in the room at the visit, and it answers who generated the plan and whether it is signed off (9/11) - **Next**
+- Design the provider-side plan on desktop -> Jay: we have to have it for the provider demos, generate plus edit, and where it lives in the provider UI is mine to decide (9/11) - **Next**
+- Evaluation is the 30-day average against the goal -> Jay already shows 30-day averages, daily max across sources, on the provider side; put the goal beside the average (9/11) - **Next**
+  - No good / bad / ugly status in v1 -> every status has to be defined and then explained to a provider (9/11)
+  - Goals are Orion text today with no front end -> the target and the progress UI per metric are mine to draw (9/11)
+- One schedule component for every goal type -> Jay wants the medication schedule UI reused, with defaults per category and some of it disabled (9/11) - **Next**
+  - Not everything is a daily schedule -> workout and screenings run on their own cadence, sleep and diet are daily (9/11)
+- Goals sync into the vitality categories, not just the plan -> a provider's eight-hour sleep goal shows under lifestyle and feeds the vitality evaluation (9/11)
+  - Vitality shows the whole plan snapshot, Inside Health shows only its own care and lifestyle goals (9/11)
+  - A goal repeating across categories is fine -> 10,000 steps can sit under metabolic health and lifestyle both (9/11)
+  - Start with the six goals mapped across the three categories -> chronic conditions stay data and trends, not active goals (9/11)
 
 
 ## Prototype — Claude design
@@ -250,8 +287,13 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Category column on the provider labs table -> Jay is adding it, it references the sub tab (9/4)
   - Provider feedback on the groupings comes back to the patient side so the two stay in sync (9/4)
 - Suggested question pills: Kelly wants one click, I want the review step -> going to Portu testing instead of a redesign (9/4) - **Blocked**
-  - Jay is widening the Orion chat box so the pills sit horizontal and the answer gets the space (9/4)
+  - [x] Jay widened the Orion chat box -> shipped 9/11, chips pinned to the input box, the view jumps to the top of the answer, sources on the patient summary (9/4)
 - Diagnostic reports land in Full Data for now -> Jay's interim call before the release (9/4)
+- Design how reports show in the provider UI -> Jay put them in Full Data to get live and calls it unusable; a report carries several observations plus documents, and the back step is wrong (9/11) - **Next**
+- No secondary action anywhere on the provider dashboard -> that is my next pass, start with vitality and reports (9/11) - **Next**
+- Decide what a provider actually needs from the vitality widget -> Jay filled it with subcategory summaries and data gaps so Dr. Porto has something to read (9/11)
+- Full data groupings can be pushed to the dashboard -> Jay's plus button becomes my select-and-pin design, three columns max per item type (9/11)
+- Medication source selection in the provider UI -> Jay will do it after meds and goals, Kelly needs it for the demo (9/11)
 
 ## Provider — Patient
 
@@ -260,6 +302,9 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Base patient access lasts as long as the provider contract, not 90 days -> check the paywall and expiry states and copy (9/4)
 - Add picture / attach file in the chat box -> Greg's ChatGPT gap, supplement label photo, has to work on mobile for patients (9/8) - **Next**
   - I have an old add-button design, review and upgrade it with Jay (9/8)
+- Summarize the notes a patient leaves along the timeline into the provider-facing patient update -> Kelly: patients forget what they meant to raise, keep visit essentials as the chief complaint (9/11) - **Next**
+  - Check the visit essentials labels -> notes for my doctor and my notes have to read as two different things (9/11)
+  - My notes is one component across the health hub; today Jay only stores notes on conditions, allergies and meds, and Orion reads them (9/11)
 
 
 ## Meds — add, schedule, log, tracking
