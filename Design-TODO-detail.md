@@ -777,6 +777,47 @@ Kelly also caught that the out-of-range labs dev task was staged wrongly: *"out 
 should not be ready for dev actually, because you haven't completed the design."*
 
 
+### 9/15 additions — design review with Kelly, Tue **2026-09-15** (47m, Jay's internet dropped)
+
+#### "Rename needs focus to out of range across the whole Health Hub"
+
+The 9/11 decision covered the reports tab. Kelly widened it while reviewing the handoff: *"I think we
+were going to change that need focus section to out of range because we're not sure it needs focus."*
+Two carve-outs she named explicitly. The **vitality score keeps its needs focus label** — *"you won't
+change it on the vitality score, you're just changing it on the label for the reports stuff, right?
+Because the vitality score says needs focus."* And anything **Orion specifically flags** keeps it:
+*"everywhere else it would say out of range unless it's specifically linked to something where Orion
+is saying needs focus. Because I can have an out of range lab, but I don't need to focus on it."*
+
+#### "Jay reviews the Health Hub reports handoff before I show it to Greg"
+
+Yuehui's own call, made when Jay dropped off the review: *"I have the finalized handoff version for
+the health hub, like reports those screens. I think this part I need Jay's input a lot."* The plan is
+to walk him through it offline before it goes in front of Greg.
+
+#### "Reports tab and out-of-range labs UI go to dev"
+
+From the team weekly the same morning. Jayanth's position was that out-of-range labs and the reports
+tab already exist in both products and only the **UI updates** are outstanding: *"if you are talking
+about the UI updates, then maybe we can push them down. But both out of range labs and report steps
+are already there."* Kelly pinned the release: *"we had those prioritized as two for design, and now
+you're saying UH is almost done with those, so those can move to dev now... within the let's go with
+the October 9 release."* Jay confirmed.
+
+Note the gap worth watching: Kelly told Greg *"these are done, which we'll get to you this week"* —
+but at the design review an hour earlier the relabel was still to do and the handoff still wanted
+Jay's review.
+
+#### "Images inside an Orion question and file upload land in the 9/25 release"
+
+Greg pushed on why Orion can't take a file or generate an image when the underlying models can.
+Jayanth's answer is the one to design against: *"when we call their APIs, each one of the data, the
+data pointer that we send to those APIs is a separate feature in its own. So sending a file is a
+different feature versus sending a text message."* He agreed to include images-within-questions in
+the **9/25** release. That gives the paused image work in this section something concrete underneath
+it.
+
+
 
 ---
 
@@ -1624,6 +1665,162 @@ carrying two jobs: what the patient sees, and what the claim says.
 
 ---
 
+### From the 9/15 design review with Kelly
+
+Source: **Design Review, Tue 2026-09-15, 47m.** Kelly and Yuehui only — Jay's internet went down.
+Yuehui walked the updated user flow and the first plan wireframes. Kelly's verdict on the flow was
+*"yeah, that looks really good"* and on the wireframes *"this looks great"*, then she gave three asks,
+which she summarised herself at the end: *"conditions, base status functionality for premium
+upgrades, and then messaging. I think those are the three big things."*
+
+#### "Call out the active conditions on the plan"
+
+This is the sign-off gate from 9/8 restated. Kelly: *"I think we need to call out the two active
+conditions a bit more clearly because Greg did really highlight that. And people want to improve based
+on conditions, right? So are they diabetic? Are they obese? Are they managing cancer?"* Her follow-on
+is the design consequence: condition specificity is what lets the plan pull real detail out of the
+record — *"if it's a specific condition, there's going to be specific treatment plan details, and
+you'll want to make sure it's clear that those are incorporated into the meds, diet, exercise
+categories that you already have."*
+
+Yuehui's constraint against duplicating it: *"provider still we have the widget of the active
+condition... I don't want to have the redundant information on their dashboard."* Her answer, which
+Kelly accepted: *"probably do one paragraph of the reasoning, but have some, we have the source chip,
+so they can hover and see the conditions."* Kelly asked for at least a placeholder on the provider
+view before the Greg meeting: *"you may want to add a placeholder here that says the conditions above
+med sleep activity nutrition, just so he knows that we're including the conditions up there."*
+
+Kelly also floated linking those conditions through to the conditions tab. Not decided.
+
+#### "Show where the plan came from"
+
+Kelly wants the provenance to be more than "Orion said so": *"not just Orion but that it came from
+your doctor or medical plan already"*, and for Orion's own contribution, *"that'll be national
+evidence from you know prevention task force or some condition specific treatment."* So three source
+classes on the reasoning: medical record, provider clinical note or existing treatment plan, and
+Orion's clinical evidence. Yuehui's framing: the user should be able to *"review the reason and to
+think about better they need to change or further editing."*
+
+#### "Put the patient's stated goal in the plan"
+
+Kelly's addition, and the most open-ended one. Examples she gave: *"I want to lose weight... I want to
+be able to pick up my grandkids... I want to walk without wheezing... I'm an elite athlete and I want
+to run a five minute mile."* Two consequences she named: it feeds Orion's drafting, and *"that should
+also go into automatically the notes for any visit to their doctor."*
+
+Yuehui pushed back on how the goal gets captured, and this is worth keeping: *"I don't want Orion to
+initiate the treatment like a traditional wellness app where they let the user do a questionnaire and
+set the goals for them. I don't want that way because we are the AI native app."* Orion drafts first,
+the user refines in conversation.
+
+The hard case Kelly raised is a goal that is clinically wrong. Her example: an obese patient whose
+goal is *"I want to play with my grandkids"* or *"my knee hurts"* rather than weight loss, where Orion
+has to curate the underlying goal from the stated outcome. Yuehui's inverse case: a patient already
+at an unhealthy weight who still asks to lose more, where Orion *"can stand in and tell the user
+probably it's not an ideal goal for you"* and route to the doctor. Both need Orion to ask about
+current physical ability and limits, which Kelly conceded *"might be a later phase."*
+
+#### "List what a base patient actually gets, category by category"
+
+Kelly's worry is that base access undercuts the premium story: *"they may get to see it but they may
+have to unlock it... to actually use it on the patient side, especially with any Orion questions and
+diet recipes and the details behind it, that in my mind requires a premium status."* She also warned
+this may not be stable: *"be prepared for Greg to maybe change his mind."*
+
+The per-category cut Yuehui proposed in the room:
+
+- **Meds** — adherence logging stays. One-click daily log, no Orion capability needed. Orion's
+  suggestions and med recommendations go away.
+- **Sleep** — tracking stays, shown against the provider's target. *"There's no reason we just block
+  them from there."*
+- **Activity** — same as sleep.
+- **Nutrition** — manual logging stays. Recipes go. Photo recognition of a meal is premium. A recipe
+  or diet plan the provider specified still shows, but read-only.
+
+Upgrade hooks: dismissible and first-time only. Kelly: *"they could click off and dismiss, but if the
+recommendation came up as a premium upgrade, they could just close it... so it's not a constant
+bombardment of premium recommendations."* The later version of the hook is meal-service partners
+(Purple Carrot, Hungry Root), which is parked.
+
+#### "Message your doctor instead of a dead-end lock"
+
+Today's flow ends a locked plan with Orion saying editing isn't allowed, contact your provider. Kelly
+wants that turned into an action: *"instead of just confirm the plan or saying this plan is locked and
+you can't edit it till you see your doctor again... that would be not the plan is locked, but message
+your doctor about."* The payload matters as much as the button — *"the doctor, in their view, has all
+the source information and questioning that the patient did with Orion already, so the doctor doesn't
+have to look it up."* This depends on the patient–provider messaging that Jay may build himself
+(see Provider — Patient).
+
+#### "Decide the labs row"
+
+The one open disagreement. Kelly wants labs as a **separate row**, reasoning that *"a screening is a
+prevention measure. A lab is a treatment status"* — if you're diabetic on insulin, one of the plan's
+goals is getting A1C back in range, and that belongs in the plan rather than only in Inside Health.
+She was direct about wanting it in the first pass: *"I would default to at least include a labs row to
+know that we're thinking about it... I'm going to say try to include it."*
+
+Yuehui's counter is to hold at six categories and surface out-of-range results through the conditions
+reasoning instead: *"let me think about because the treatment plan will add the current condition and
+the reasoning behind that, so probably I can pick the lab result really close to your active
+condition."* She left it as *"probably it just can be the seventh category. Let me think about it."*
+
+Both agreed on the filter regardless of where it lands: Orion picks which labs belong to the condition
+(*"the doctors said you have diabetes. Which of these labs should be monitored? And Orion should be
+able to pick those, like your A1C and glucose"*), and they only appear while out of range. Kelly's own
+counter-example for why a raw out-of-range list is wrong: *"I had a bunch that were abnormal or out of
+range, but the doctor and Orion were like, meh, they're just low... I wouldn't want all those to flag
+on my treatment plan."*
+
+#### "Work through initiation and onboarding"
+
+Kelly's list of scenarios, which Yuehui acknowledged as the missing half — *"right now I just create
+happy paths"*:
+
+- Where does the health goal get captured if not in onboarding? *"Do we need to add an onboarding or a
+  profile question to say what are your health goals?"* A "none" answer defaults to maintain current
+  status.
+- What kicks the plan off if the patient never connects a record, or connects only Apple Health?
+  *"They wouldn't have a treatment plan. Would they have one just saying I want to lose weight?"*
+- How much input is enough — is one medical record sufficient to generate?
+
+Kelly expects Jay to have a parallel list from the dev side.
+
+#### "Premium patient edits the draft with Orion until the provider pushes it"
+
+**This contradicts a decision already in the list.** The 9/11 team meeting settled *"v1 has no patient
+editing at all, not even premium; the patient sees the plan and their progress, the provider is the
+only editor."* The flow presented on 9/15 has the premium patient editing freely with Orion — target
+values, goals, re-drafting on request — right up until a provider reviews and pushes, at which point
+it locks. Kelly did not flag the conflict and reviewed the flow as shown.
+
+Both can't be true in v1. Either the 9/11 line is superseded, or the flow going to Greg overstates what
+gets built. Worth resolving before the Greg review, because it changes the disclaimer states too: the
+9/15 flow has "generated by Orion, double check with your provider" before push and "reviewed by your
+doctor" after.
+
+#### "Six categories map into care and lifestyle"
+
+Yuehui's summary of what she and Jay agreed, restating the 9/11 vitality sync: meds, screenings and
+vaccines land under **care**; sleep, activity and nutrition land under **lifestyle**; the plan's goals
+become the sub-goals of those categories, and both feed the vitality evaluation.
+
+#### "Multi-plan for a patient with several conditions"
+
+Kelly talking out loud, explicitly not for now: *"they might want two different plans. So we're going
+to have to think about what that looks like... I think this is fine for now, but we may need to be
+prepared to make it a multi-plan."* Yuehui agreed the six categories won't carry a comprehensive plan
+forever, *"but let's start from here."*
+
+#### "Show Greg the flow and get the approval"
+
+Kelly's closing push, and the reason the conditions work is urgent: *"we just need him to approve it so
+we can move forward with dev. Because last time he didn't approve it, right? He needed conditions.
+That's why I'm really focused on this condition piece."* Yuehui's plan was to review the user flow
+with him and show the wireframes only if he asks, since they're still low fidelity.
+
+---
+
 ## Prototype — Claude design
 
 Added 2026-08-11. This restates and sharpens a line from the old manual list that I wrongly dropped
@@ -1876,6 +2073,92 @@ Nothing to design yet — it's the fact to design against, and the reason the de
 above came up.
 
 
+
+---
+
+## B2B — Healthcare Monitor (employer)
+
+Source: **C4P team weekly, Tue 2026-09-15**, roughly 0:37 to 1:02. Greg's ask, new this week, and the
+only genuinely new design workstream out of either meeting.
+
+### "Quick mockup of the aggregate employer view"
+
+Greg's business case first, because the design follows from it. An employer running a preventative
+program wants to prove it works so they can negotiate insurance rates: *"I'm running these preventative
+programs. I'm going to have healthier employees. They're going to have less sick time, but most
+importantly, I'm going to drive down the amount of disease coming out of my installed base, I'm going
+to use that to negotiate down my rates for the insurance companies."* The market argument is that it
+opens C4P to *"every large employee base in the country"* rather than one doctor at a time.
+
+The starting point is an existing asset, not a blank page. Kelly: *"you did a mock for us when we went
+to Indiana, and it was basically saying all your patients, how many are in the needs focus versus
+stable, and then you drill down based on conditions. So the group level analytics, basically, for the
+patients in your population."* Part of that (the employee network view) Jay actually built; the health
+summary half stayed a mock.
+
+What Greg wants in it:
+
+- **Aggregate only, anonymised.** *"You don't have a HIPAA agreement to look at an individual, so it's
+  anonymised data that's aggregated, and they don't really want to look at every individual. They want
+  to look at how am I trending."* A 100,000-employee HR department has no use for a patient list.
+- **Goals on top, compliance on the bottom.** *"You'd want the goal side on the top, and on the bottom
+  you would want the compliance side. How many of my patients are actually following their diet, or
+  how many employees are following the diet, doing the workout programs, taking their meds."*
+- **Configurable, like the provider dashboard.** *"I would even use the framework you did for the
+  provider, where it's user-defined dashboard. Let them pull in what the metrics are that they want."*
+  His metric examples: glucose trending pre-diabetic, A1C, LDL and the statin side, skeletal problems
+  and recent breaks, smoking.
+- **Segmentation.** *"Show it to me for all men. Show it to me, all women. Show it to me for 35 years
+  old and below... Show it to me by state."* Kelly added conditions and geography.
+- **A new role.** *"It's a new role called call it health administrator or health monitor."* Yuehui's
+  read, which Greg confirmed: a standalone desktop app for the employer, not a view inside the provider
+  product. Her scoping question, also confirmed: *"their role is basically just monitoring, right? The
+  treatment plan still from our concept is from the patient and the provider, but the employer, they're
+  just monitoring their status or adherence."*
+- **Jay's half.** Dynamic query generation off whatever metrics get configured. Jay's view is that this
+  is the same concept as the employee-network work already started.
+
+Greg also wants a tier above the employer eventually — *"I just want all the data, which we would start
+selling to the government and pharmaceutical companies"* — which is parked. Kelly noted the same
+aggregate-query capability is something providers will want for their own panels, and Greg flagged
+clinical trial recruitment as a third use.
+
+Fidelity expectation is low and Greg said so: *"I'd even tell him this is an alpha stage right now...
+but I have to have something to show."* Yuehui's estimate: *"if it's a mock-up or the quick prototype
+based on our last version, it should be quick, but I can integrate all the ideas we have. On the UI or
+the products, it probably is not the polished version."*
+
+### "Greg's order is treatment plan wireframes first, then this"
+
+Kelly asked the priority question directly: *"do you want her to finish the prevention treatment
+wireframes to get to Jay for development first, or you want her to take a few hours to get you
+something first?"* Greg's answer: *"he's got to get the product built first"*, so the order is treatment
+plan → hand to Jay → monitor mockup.
+
+The order and the deadline don't reconcile, and that is the thing to watch. Greg also said *"take a
+shot at it, and then buzz me as soon as you got something to look at"*, and his Lisa meeting is
+**Wed 9/23**. Kelly's own estimate was *"I'm just not sure how much can be mocked up with Porto and
+other things going on by next Wednesday... maybe by Friday"*, which lands after the meeting. Greg
+believes the treatment plan is already handed off (*"you've got enough UIs for Jay to start on now"*),
+and Yuehui corrected him in the room: *"the treatment plan, no, it's not ready for Jay for now."*
+
+Kelly's priority stack at the end of the weekly put CareCloud first, the healthcare monitor second, and
+noted this pushes down caregiver features, image inclusion and partner functionality again.
+
+### "HIPAA arrangement is unresolved"
+
+Greg's assumption is that a HIPAA-compliant form between the health monitor and the employee solves it.
+Kelly's objection: *"who's the covered entity in that situation? ... A provider is the covered entity"*,
+and an employer isn't one. Greg's counter is that the employer could be the provider of the preventative
+portion while each doctor provides the medical portion. Kelly: *"I've never heard of that, but yeah,
+interesting idea."*
+
+Where it landed, roughly: HIPAA consent is probably the wrong instrument, the employer likely already
+has personal-data consent from employment, and the real exposure is *"what potential laws might you
+break with any perceived bias or undue consent."* Kelly took the research. This doesn't block the mock,
+but it does gate anything that shows employee-level opt-in or incentive mechanics, which Greg raised
+(*"the employer could offer an incentive that says I give you 50 bucks a month off of your payment, but
+you have to allow us to see whether or not you're doing a preventative program"*).
 ---
 
 ## Provider — Patient

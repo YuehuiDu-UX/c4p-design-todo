@@ -14,6 +14,8 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 **9/11: the plan entry point is settled, and so is the reports grouping.** Orion always generates the plan — the provider generate button is the trigger for a base patient, a premium patient gets one automatically like vitality — and only the provider edits it in v1. Reports group as out of range / new / past with no date rule. Jay builds meds and goals first, health hub after.
 
+**9/15: Kelly reviewed the plan flow and gave three asks before Greg sees it** — conditions, what a base patient actually gets, and messaging instead of a dead-end lock. Greg added a new role in the weekly: an aggregate employer view he wants mocked for the Lisa meeting on 9/23. Reports moves to dev for the 10/9 release. Caregiver, images and partner features get pushed down again.
+
 ---
 
 ## Caregiver — Patient App
@@ -124,6 +126,10 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Images as their own class in the UI -> a mammogram shouldn't sit under tests and procedures, Jay says diagnostic report is the right home (9/4) - **Pause**
 - Plain-language label on clinical report names -> nobody searches "breast diagnostic bilateral with tomosynthesis", they type mammogram (9/4)
 - Document titles are gobbledygook on both sides -> no filename comes from the health systems, provider + type + date may be the label (9/4) - **Pause**
+- Rename needs focus to out of range across the whole Health Hub, not just the reports tab -> needs focus stays on the vitality score and on anything Orion specifically flags (9/15)
+- Jay reviews the Health Hub reports handoff before I show it to Greg (9/15)
+- Reports tab and out-of-range labs UI go to dev -> Jay: the 10/9 release (9/15)
+- Images inside an Orion question and file upload land in the 9/25 release -> Jay, so the paused image work has something to sit on (9/15)
 
 
 ## Treatment Plan / Lifestyle Plan
@@ -263,6 +269,28 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
   - Start with the six goals mapped across the three categories -> chronic conditions stay data and trends, not active goals (9/11)
 
 
+### From the 9/15 design review with Kelly
+
+- Call out the active conditions on the plan -> Kelly: are they diabetic, obese, managing cancer, and Greg withheld sign-off over exactly this (9/15)
+  - One paragraph of reasoning with source chips, not a second conditions block -> the provider already has the active condition widget, don't repeat it on the dashboard (9/15)
+  - Put a placeholder above meds / sleep / activity / nutrition on the provider view so Greg can see where conditions land (9/15)
+- Show where the plan came from -> medical record, provider clinical note, Orion's own evidence, so the patient reads the why before they ask to change it (9/15)
+- Put the patient's stated goal in the plan -> lose weight, pick up my grandkids, walk without wheezing, and it should carry into the visit notes (9/15)
+  - Orion drafts the goal and refines it in conversation -> no onboarding questionnaire, we're an AI-native app (9/15)
+  - Orion pushes back on a clinically unsafe goal instead of taking it as written (9/15)
+- List what a base patient actually gets, category by category -> meds adherence, sleep against the target, activity, manual nutrition log; no Orion suggestions, recipes or photo recognition (9/15)
+  - Premium hooks are dismissible and first-time only -> not a constant upgrade bombardment (9/15)
+  - Meal-partner upsell later -> Purple Carrot, Hungry Root (9/15) - **Pause**
+- Message your doctor instead of a dead-end lock -> Orion carries the patient's question and its sources into the provider's view so the doctor doesn't look it up again (9/15)
+- Decide the labs row -> Kelly wants out-of-range labs in the first pass, I'd rather tie them to the active condition than open a seventh category (9/15)
+  - Only the labs Orion picks as belonging to the condition, and only while they're out of range (9/15)
+  - Not every out-of-range lab belongs on a plan -> Kelly's own were low and neither her doctor nor Orion cared (9/15)
+- Work through initiation and onboarding -> where the goal gets captured, and what a patient gets with no records connected or Apple Health only (9/15)
+- Premium patient edits the draft with Orion until the provider pushes it -> that's what I showed and Kelly agreed, but 9/11 settled on no patient editing in v1, so one of the two has to give (9/11, 9/15)
+- Six categories map into care and lifestyle -> meds, screenings and vaccines to care, sleep, activity and nutrition to lifestyle, and both feed vitality (9/15)
+- Multi-plan for a patient with several conditions -> Kelly thinking out loud, fine as one plan for now (9/15) - **Pause**
+- Show Greg the flow and the plan designs and get the approval so Jay can start (9/15)
+
 ## Prototype — Claude design
 
 - Build the mobile patient app in the Claude design prototype, from the Figma screens (8/11)
@@ -292,6 +320,20 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Decide what a provider actually needs from the vitality widget -> Jay filled it with subcategory summaries and data gaps so Dr. Porto has something to read (9/11)
 - Full data groupings can be pushed to the dashboard -> Jay's plus button becomes my select-and-pin design, three columns max per item type (9/11)
 - Medication source selection in the provider UI -> Jay will do it after meds and goals, Kelly needs it for the demo (9/11)
+
+## B2B — Healthcare Monitor (employer)
+
+- Quick mockup of the aggregate employer view -> Greg wants it for the Lisa meeting on 9/23, built off the Indiana employee network mock (9/15)
+  - Aggregate and anonymised only, no drill-down to a named patient (9/15)
+  - Goals on top, compliance on the bottom -> who is actually doing the diet, the workout, the meds (9/15)
+  - Configurable metrics the way the provider dashboard is -> glucose trending pre-diabetic, A1C, LDL, statins, skeletal injuries, smoking (9/15)
+  - Segment it -> all men, all women, under 35, by state, by condition (9/15)
+  - New role, health administrator or health monitor -> its own desktop app, not a provider view (9/15)
+  - Jay's half is dynamic queries off whatever they configure (9/15)
+  - A second tier above the employer that sells all the data to government and pharma (9/15) - **Pause**
+- Greg's order is treatment plan wireframes to Jay first, then this -> but he still wants something to look at before 9/23 (9/15)
+- HIPAA arrangement is unresolved -> Kelly: the employer isn't a covered entity, Greg thinks the employment consent already covers it, she's checking (9/15) - **Blocked**
+
 
 ## Provider — Patient
 
