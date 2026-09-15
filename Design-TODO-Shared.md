@@ -120,7 +120,6 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
   - Needs focus keeps the timing, the goal and the treatment plan, and stays with vitality (9/11)
   - Report detail needs a provider-notes line for when we have doctor notes -> my notes is the patient's (9/11)
 - Plain-language label on clinical report names -> nobody searches "breast diagnostic bilateral with tomosynthesis", they type mammogram (9/4)
-- Reports tab grouping is due next Tuesday to Greg -> Greg: do it first, the pilots need it, and Jay's diagnostic tab is waiting on my UI (9/8) - **Next**
 
 ## Treatment Plan / Lifestyle Plan
 
@@ -294,4 +293,4 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 ---
 
-_Generated 2026-09-14 14:25 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
+_Generated 2026-09-15 14:11 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._

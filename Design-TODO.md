@@ -124,7 +124,6 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Images as their own class in the UI -> a mammogram shouldn't sit under tests and procedures, Jay says diagnostic report is the right home (9/4) - **Pause**
 - Plain-language label on clinical report names -> nobody searches "breast diagnostic bilateral with tomosynthesis", they type mammogram (9/4)
 - Document titles are gobbledygook on both sides -> no filename comes from the health systems, provider + type + date may be the label (9/4) - **Pause**
-- Reports tab grouping is due next Tuesday to Greg -> Greg: do it first, the pilots need it, and Jay's diagnostic tab is waiting on my UI (9/8) - **Next**
 
 
 ## Treatment Plan / Lifestyle Plan
@@ -320,3 +319,4 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 ## Done
 
 - [x] Build the caregiver screens as a clickable prototype -> a lot of new entry points, need to check every button (8/25, 9/14)
+- [x] Reports tab grouping is due next Tuesday to Greg -> Greg: do it first, the pilots need it, and Jay's diagnostic tab is waiting on my UI (9/8, 9/15)
