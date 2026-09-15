@@ -323,6 +323,8 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 ## B2B — Healthcare Monitor (employer)
 
+Brief: `C4P_MonitoringEmployerPlatform_Requirements-Brief_v1.md`
+
 - Quick mockup of the aggregate employer view -> Greg wants it for the Lisa meeting on 9/23, built off the Indiana employee network mock (9/15)
   - Aggregate and anonymised only, no drill-down to a named patient (9/15)
   - Goals on top, compliance on the bottom -> who is actually doing the diet, the workout, the meds (9/15)
@@ -331,6 +333,11 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
   - New role, health administrator or health monitor -> its own desktop app, not a provider view (9/15)
   - Jay's half is dynamic queries off whatever they configure (9/15)
   - A second tier above the employer that sells all the data to government and pharma (9/15) - **Pause**
+  - 1. One desktop screen, one fictional employer, one configured metric set (9/15)
+  - 2. Two-half layout -> outcomes on top, compliance on the bottom (9/15)
+  - 3. Filter bar that visibly does something -> draw at least one filtered state (9/15)
+  - 4. Suppressed cell in the filtered state -> too few to report below a minimum count, so the privacy answer is on screen and not in Greg's mouth (9/15)
+  - 5. Metric picker as a panel -> drawn, not functional (9/15)
 - Greg's order is treatment plan wireframes to Jay first, then this -> but he still wants something to look at before 9/23 (9/15)
 - HIPAA arrangement is unresolved -> Kelly: the employer isn't a covered entity, Greg thinks the employment consent already covers it, she's checking (9/15) - **Blocked**
 

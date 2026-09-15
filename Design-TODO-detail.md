@@ -2081,6 +2081,9 @@ above came up.
 Source: **C4P team weekly, Tue 2026-09-15**, roughly 0:37 to 1:02. Greg's ask, new this week, and the
 only genuinely new design workstream out of either meeting.
 
+Full extraction, with the strategic frame and the constraints, lives in
+`C4P_MonitoringEmployerPlatform_Requirements-Brief_v1.md`.
+
 ### "Quick mockup of the aggregate employer view"
 
 Greg's business case first, because the design follows from it. An employer running a preventative
@@ -2159,6 +2162,33 @@ break with any perceived bias or undue consent."* Kelly took the research. This 
 but it does gate anything that shows employee-level opt-in or incentive mechanics, which Greg raised
 (*"the employer could offer an incentive that says I give you 50 bucks a month off of your payment, but
 you have to allow us to see whether or not you're doing a preventative program"*).
+### Build order for the 9/23 mock
+
+Five sub-tasks under the mockup line, in order. The cut is in §8 of the brief. The point of the mock is
+to make the aggregate idea concrete enough for Lisa to react to and to invite her to shape it, not to
+be production UI.
+
+1. **One desktop screen, one fictional employer, one configured metric set.** Not a metric picker
+   working end to end, not multiple employers. Greg has already accepted alpha fidelity.
+2. **Two-half layout.** Outcomes on top, compliance on the bottom, exactly as Greg described it. The
+   causal claim the screen has to carry is that the diet and workout programs move the numbers above.
+3. **A filter bar that visibly does something.** Draw at least one filtered state, not just the
+   control. Greg's demo script is a sequence of filter asks — all men, all women, under 35, by state —
+   so the filtered view is the thing he will actually show.
+4. **A suppressed cell in the filtered state.** Below a minimum count the cell reads *too few to
+   report* instead of a number. This is the answer to the re-identification problem in §6.2 of the
+   brief: three stacked filters routinely produce a cell of one or two people, and an HR director knows
+   who that person is. Putting it on screen turns a liability into a trust signal, and it is much
+   cheaper to design now than to retrofit, because it changes how every tile behaves when filtered.
+   Nobody raised this in the meeting — it is a recommendation, not a decision.
+5. **Metric picker as a panel.** Drawn, not functional. Enough to show that the administrator chooses
+   what they track, which is the part Greg keeps returning to.
+
+Deliberately out: the second aggregate tier, the provider version, trial recruitment, incentive
+mechanics, and roster onboarding. The roster question is the real unknown (§7 of the brief) — an
+employer's headcount and C4P's enrolled patients are different numbers, and which one is the
+denominator changes the story every tile tells.
+
 ---
 
 ## Provider — Patient
