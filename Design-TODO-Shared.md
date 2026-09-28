@@ -20,6 +20,8 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 **9/15: Kelly reviewed the plan flow and gave three asks before Greg sees it** — conditions, what a base patient actually gets, and messaging instead of a dead-end lock. Greg added a new role in the weekly: an aggregate employer view he wants mocked for the Lisa meeting on 9/23. Reports moves to dev for the 10/9 release. Caregiver, images and partner features get pushed down again.
 
+**9/25: image generation is the top design priority, alongside the plan.** The first pass of the user flow and the plan UI updates both go to Tuesday's design review (9/29). Jay's dev for images inside an Orion question slipped to Tuesday as well. The multi-agent exit problem goes to the back burner. The patient tab ships to the app store as My prevention plan.
+
 ## Caregiver — Patient App
 
 - Redesign the care recipient view -> not just allergies / meds / conditions / procedures (8/7)
@@ -126,6 +128,17 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Jay reviews the Health Hub reports handoff before I show it to Greg (9/15)
 - Reports tab and out-of-range labs UI go to dev -> Jay: the 10/9 release (9/15)
 - Images inside an Orion question and file upload land in the 9/25 release -> Jay, so the paused image work has something to sit on (9/15)
+
+## Image Generation — Orion
+
+- Image generation user flow -> first pass for Tuesday's design review, Kelly and Jay confirmed it as the top design priority with the plan (9/25) - **Next**
+  - Minimal version: the patient asks Orion, Orion generates, reuse the image viewer component (9/25)
+  - No auto-generate and no generate button on report detail -> generate in Orion chat, then a button to add it to the report (9/25)
+  - Greg wants it automatic -> open an MRI report for broken ribs and it shows broken ribs; my flow says no, needs his answer (9/25)
+  - Thumbnail in chat, tap for full screen on mobile -> Jay wants the full image, not today's thumbnail (9/25)
+  - Greg wants it in several places, report detail first -> e.g. an MRI report tied to a procedure (9/25)
+- Images inside an Orion question -> Jay's dev, moved to Tuesday 9/29, the 30th is the target (9/25)
+  - My add-button design sits under Provider — Patient -> check it against what Jay ships (9/25)
 
 ## Treatment Plan / Lifestyle Plan
 
@@ -271,6 +284,21 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Six categories map into care and lifestyle -> meds, screenings and vaccines to care, sleep, activity and nutrition to lifestyle, and both feed vitality (9/15)
 - Show Greg the flow and the plan designs and get the approval so Jay can start (9/15)
 
+### From the 9/25 team meeting
+
+- Update -> redraft, update reads like it changes my goals (9/25)
+- After the provider publishes, the plan locks -> no update button; reviewed by Dr. name, updated at your next visit (9/25)
+  - Kelly: if the provider can still change it, call it change or modify, and not the blue primary button (9/25)
+- Footer on the draft -> drafted by Orion, review with your provider (9/25)
+- Looks good only acknowledges -> say acknowledged by you (9/25)
+- Empty state for a category with no data -> hide it (9/25)
+- Premium awareness during the 7-day trial -> Kelly says no notice feels bait-and-switch, I lean to tags only after they lose it (9/25)
+  - Base patient whose plan goes away -> reuse the paywall card (9/25)
+  - Go through the current screens first so premium chips don't land everywhere (9/25)
+- Plan update notification -> automatic or on every refresh, Kelly asked me to think about it (9/25)
+- Generate my own PTP and send Jay the bugs -> whole team, before the app store submit (9/25)
+- Plan UI updates to Tuesday's design review -> quick call with Jay for anything small before the app store (9/25)
+
 ## Prototype — Claude design
 
 - Build the mobile patient app in the Claude design prototype, from the Figma screens (8/11)
@@ -296,6 +324,11 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 - Decide what a provider actually needs from the vitality widget -> Jay filled it with subcategory summaries and data gaps so Dr. Porto has something to read (9/11)
 - Full data groupings can be pushed to the dashboard -> Jay's plus button becomes my select-and-pin design, three columns max per item type (9/11)
 - Medication source selection in the provider UI -> Jay will do it after meds and goals, Kelly needs it for the demo (9/11)
+- Detail screen for each item in the provider app -> the missing part, Jay has no detail components yet (9/25)
+- Source label on documents Orion generates -> "generated from FHIR / EMR data" at the top, doctors don't read it as an original source (9/25) - **Blocked**
+  - Waiting on Kelly's example document (9/25)
+  - Need the list of document types first -> a chip or tag behind the document name (9/25)
+- Orion answers "how do I add meds to my dashboard" with the meds widget and an add button -> keep the CTA calm inside chat (9/25)
 
 ## B2B — Healthcare Monitor (employer)
 
@@ -336,6 +369,10 @@ Brief: `C4P_MonitoringEmployerPlatform_Requirements-Brief_v1.md`
 
 - Emphasize the health ID / C4P account that user can share with other people.... even maybe combined with the health hub
 
+## Design System & Knowledge Base
+
+- Visual style guide for the AI knowledge base -> I own the product design folder, Tristen's branding stays under marketing (9/25)
+
 ---
 
-_Generated 2026-09-15 18:21 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
+_Generated 2026-09-28 15:06 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._

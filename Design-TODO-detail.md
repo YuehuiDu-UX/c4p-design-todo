@@ -821,6 +821,43 @@ it.
 
 ---
 
+## Image Generation — Orion
+
+New section 9/25. It picks up the two paused image lines that were waiting for a job: "Orion generates the image when an imaging report has no picture" under Reports (9/4) and "Image generation needs a job before it needs a design" under the plan (8/31). Their statuses were left as they were; the flow below is where the work now happens.
+
+Source: **Team meeting "Discuss open items", Fri 2026-09-25, 2h52m** (Otter). Kelly, Jay, Daphne, Lorina, Tristen, Teri. Quotes lightly cleaned; Otter hears Orion as "R" / "RW".
+
+#### "Image generation user flow"
+
+Two tracks got untangled because Kelly was mixing them up. Jay: *"attaching images, not image generation, including images within questions. That's the one I said I'll have with this release."* Kelly then set the order: *"image generation is a high design priority"*, and at the end, *"Image generation and PTP are design priorities."* Yuehui confirmed: *"right now I will do the image generation flow first, and ... some things to review on the treatment plan on Tuesday."* Jay put the multi-agent work behind both.
+
+Timing Yuehui gave: Tuesday if image generation is the only thing, *"next Friday"* if it runs in parallel with the plan. Kelly booked Tuesday, so the first pass is a flow, not finished screens.
+
+**Yuehui's minimal version:** *"a user asks Orion to generate an image for me, and we pop up ... the image viewer component. We can use that as the minimal version."*
+
+**Where it gets triggered.** Greg's version, relayed by Jay: *"it should automatically generate images. Like if I go into a report for an MRI ... for broken ribs, it should show me broken ribs."* Jay also said Greg wants it *"in several places"*, report detail first. Yuehui's position: *"it will not automatically generate the images, or even have the call to action button in the report detail screen. The user needs to generate through the Orion chat, and then we can have the button to let them add it to your report."* That contradicts Greg's stated ask, so it needs his answer, not just Jay's.
+
+**Thumbnail vs full.** Jay: *"it definitely needs to be full, not the thumbnail we show today."* Yuehui: *"on the mobile, still you need the thumbnail and then click to see the full image, and the full image will take over the screen."* Jay also noted chat today shows images you uploaded or images from your record; a generated one is a third kind.
+
+**Open, not raised in the meeting (Claude's flags):**
+- A generated picture of "your broken ribs" is an illustration, not the patient's scan. Label it so nobody mistakes it for imaging, and decide whether it can sit inside a report next to real source documents.
+- Premium gating: Orion is already premium, so a chat-only trigger gates cleanly. An auto-generate on report detail would need its own gate.
+- The 8/31 question, what job the image does for the patient, is still unanswered. Greg's broken-ribs example is the best candidate to design against.
+
+#### "Images inside an Orion question"
+
+Jay's dev work, not design. Promised for the 9/25 release on 9/15, then: *"I might have to slightly delay it, maybe ... Tuesday."* Kelly put *"30th just to have a date in there"*, then *"I actually changed the include images to Tuesday"*. The Otter action item still says the 30th. Jay's reason to keep it high: *"providers might end up using it also if they want to attach an image on Orion."* Yuehui's add-button task is "Add picture / attach file in the chat box" under Provider — Patient (9/8, Next); worth checking before it ships so dev isn't building a different button.
+
+#### "Multi-agent handoff"
+
+The prod bug: once Orion hands off to the Connect or Add Meds agent, asking *"what's my A1C"* just gets *"give me the name of your health system"* again. Jay is shipping **Exit connect** / **Exit add meds** buttons as a safety fix. He keeps the agents separate for token cost and base-vs-premium gating: *"I can't really gate after I ask a question. I can only gate before."* Kelly asked for a triage agent; Jay's worry is an extra LLM call on every turn.
+
+Yuehui's position: *"the multiple agent workflow should be silent to the user side. They don't need to know the complicated system ... They can switch the topic whenever they want."* Kelly: *"I would defer to the latter where they don't know."* A quick idea Yuehui floated and dismissed herself: disable free text inside a workflow and show a form.
+
+Jay parked it: *"keep that as the back runner ... it's an edge case ... Nobody's saying that."* The only thing he'd take now is making exit more visible, if it's cheap.
+
+---
+
 ## Treatment Plan / Lifestyle Plan
 
 Source: Greg's pricing / product meeting **2026-08-24** (where the feature was born, Greg in the
@@ -1821,6 +1858,46 @@ with him and show the wireframes only if he asks, since they're still low fideli
 
 ---
 
+### From the 9/25 team meeting
+
+Source: **Team meeting "Discuss open items", Fri 2026-09-25, 2h52m** (Otter). Kelly, Jay, Daphne, Lorina, Tristen, Teri. Quotes lightly cleaned; Otter hears Orion as "R" / "RW". Jay demoed the plan from the patient app (0:53 to 1:15).
+
+#### "Update -> redraft"
+
+Jay's update button is for a patient who generated with one record and now has three. Kelly: *"Why am I updating? What will it do? Like change your goals."* Yuehui: *"update ... will change my goals, or confuse if the data is not the latest data. I just want refresh ... I change it to redraft."*
+
+#### "After the provider publishes, the plan locks"
+
+Jay: once a provider publishes, *"you don't see the update button here anymore because it's published. It's locked."* Yuehui has it as *"reviewed by [doctor name], and updated at your next visit"*, since the patient has no more actions at that stage. Kelly's sub-point is about the provider side: *"it's not so much an update, but they want to change existing plan"*, so *"change or modify"*, and *"maybe it shouldn't be blue"*. She also asked how often a plan gets renewed or extended.
+
+#### "Footer on the draft" / "Looks good only acknowledges"
+
+Jay: the plan says *"generated by Orion"* when the patient generated it, plus *"discuss and review with your provider"*. **Looks good** only turns it acknowledged, and doesn't say by whom; he'd change it to *"acknowledged by you"* unless Yuehui has better. Yuehui already redesigned the draft footer.
+
+#### "Empty state for a category with no data"
+
+A tester on the provider side had no adherence. Kelly and Yuehui: hide the category; Yuehui makes the empty state. Nutrition is missing as a fourth box because there's no tracking source yet. Greg wasn't happy, but it's dev priority, not design.
+
+#### "Premium awareness during the 7-day trial"
+
+Kelly: *"How will they know the things that they're gonna lose in seven days until they lose it?"* and later *"it feels a little bait and switchy if we don't at least let them know."* Yuehui's view is the industry pattern: no premium tag while they have it, tags after they lose it. Kelly left it with her: *"You tell us."* Concrete case from Kelly: a base patient at Portu's practice generates a plan, which is premium, and it goes away. Yuehui: *"we will reuse the paywall card."* Also: *"I also need to go through all the current screens ... I don't want those little chips fly away across all our screens."* Base access was changed from 90 days to a year, and free trial ranks above base.
+
+Relates to 9/15 "Premium hooks are dismissible and first-time only". Kelly's ask is a disclosure, not an upsell, and the two need different treatment.
+
+#### "Plan update notification"
+
+Kelly: *"think about the notification for update your plan, is it auto or notified with every refresh."* Loose ask, no decision.
+
+#### "Generate my own PTP and send Jay the bugs"
+
+Whole-team ask before the app store submit. Android needs the most attention, med adherence especially. Kelly is screen-recording her Android run. Jay is submitting with **My prevention plan** as the tab name because he's worried about app review and "treatment plan".
+
+#### "Plan UI updates to Tuesday's design review"
+
+Yuehui: *"I have some things to review, but we can put it on the Tuesday design review session."* Jay wants anything small before submitting: *"Anything quick that I can do ... I want to do it before I submit to app stores."* They agreed on a quick call right after the meeting.
+
+---
+
 ## Prototype — Claude design
 
 Added 2026-08-11. This restates and sharpens a line from the old manual list that I wrongly dropped
@@ -2072,7 +2149,21 @@ range labs to match the patient side.
 Nothing to design yet — it's the fact to design against, and the reason the detail-view question
 above came up.
 
+### 9/25 additions — team meeting Fri **2026-09-25**
 
+Source: **Team meeting "Discuss open items", Fri 2026-09-25, 2h52m** (Otter). Kelly, Jay, Daphne, Lorina, Tristen, Teri. Quotes lightly cleaned; Otter hears Orion as "R" / "RW".
+
+#### "Detail screen for each item in the provider app"
+
+While Jay showed four heart-rate readings back to 2020 on the provider side, Yuehui: *"I need to create the drill-down page, the screen for each item here ... that's the missing part I know for the provider app."* Jay: *"we don't have any detail components yet."* Same gap as the 9/4 line "No detail view anywhere in the provider UI except reports". Kelly wants to test with Portu how far back a trend should go.
+
+#### "Source label on documents Orion generates"
+
+Kelly clicks the documents button a lot in demos. Doctors push back that an Orion-generated document *"doesn't look like an original source ... They're looking for the clinical note from Doctor So and So."* Her ask: a header like *"generated from FHIR data"*. Yuehui: *"I need a list of the different types ... so I can create the chips or the tag behind the documentation name."* Jay's split: discrete data (entered into an EMR field, like heart rate) has no document to show; document-sourced data does; the generated summary is the third kind. Kelly owns sending an example (Otter action item). Blocked on that.
+
+#### "Orion answers 'how do I add meds to my dashboard' with the meds widget"
+
+Yuehui: *"why, when you ask Orion how can I add the meds to my dashboard, didn't Orion just show the widget or the add button?"* Kelly: *"a good idea."* Jay: the provider side doesn't have the See stats / See medications chips the patient side has yet. Yuehui's caution: *"it will happen inside the Orion chat, so probably will be a little bit busy, and I need to control the user's behavior there."* Separate from the select-each-med UI she already designed, which Jay hasn't built.
 
 ---
 
@@ -2286,6 +2377,16 @@ Carried verbatim from the manual list. The idea: the C4P account is itself a sha
 identity, and that might belong in the health hub rather than buried in profile settings. Adjacent
 existing work: `share-health-data-mockup.html`, `share-data-v2-v3-compare.html`,
 `patient-consent-wireframes.html`.
+
+---
+
+## Design System & Knowledge Base
+
+New section 9/25.
+
+#### "Visual style guide for the AI knowledge base"
+
+Kelly is restructuring the SharePoint AI knowledge base (marketing, operations, product, technical architecture) so Claude can read it, with no PHI. She made Yuehui owner of the product design folder: *"I'm going to switch this to you own it, and so no one else can change it."* Visual identity and design guidance are Yuehui's; Tristen keeps his own branding under marketing (*"my branding and her branding are different branding"*). Kelly: *"Yuehui, you're working on ... that visual style guide ... We always want Claude to have access to that."*
 
 ---
 

@@ -641,6 +641,33 @@ const DATA = [
       <p>Greg pushed on why Orion can't take a file or make an image when the underlying models can. Jay's answer is the one to design against: <i>"when we call their APIs, each one of the data, the data pointer that we send to those APIs is a separate feature in its own. So sending a file is a different feature versus sending a text message."</i></p>
       <p>He agreed to include images-within-questions in the 9/25 release. That gives the paused image items in this section something concrete underneath them.</p>`},
   ]},
+  {title:'Image Generation — Orion', accent:'var(--sky)', src:'Team meeting "Discuss open items" Fri 2026-09-25. Picks up the paused image lines under Reports (9/4) and the plan (8/31).', items:[
+    {t:"Image generation user flow -> first pass for Tuesday's design review, Kelly and Jay confirmed it as the top design priority with the plan", d:'9/25', s:'next', x:`
+      <p>Two tracks: Jay's <b>images inside a question</b> (dev) and <b>Orion generating an image</b> (design, yours). Kelly: <i>"Image generation and PTP are design priorities."</i> Tuesday is a first-pass flow; you said a full week if it runs alongside the plan.</p><p><b>Open (Claude):</b> label a generated picture as an illustration, not the patient's scan; the 8/31 "what job does it do" question is still unanswered.</p>`, kids:[
+      {t:"Minimal version: the patient asks Orion, Orion generates, reuse the image viewer component", d:'9/25', s:'open', x:`
+        <p>You: <i>"a user asks Orion to generate an image for me, and we pop up ... the image viewer component."</i></p>`},
+      {t:"No auto-generate and no generate button on report detail -> generate in Orion chat, then a button to add it to the report", d:'9/25', s:'open', x:`
+        <p>Your proposal. Chat-only also gates cleanly, since Orion is already premium.</p>`},
+      {t:"Greg wants it automatic -> open an MRI report for broken ribs and it shows broken ribs; my flow says no, needs his answer", d:'9/25', s:'open', x:`
+        <p>Relayed by Jay. Your flow contradicts it, so it needs Greg's answer, not just Jay's.</p>`},
+      {t:"Thumbnail in chat, tap for full screen on mobile -> Jay wants the full image, not today's thumbnail", d:'9/25', s:'open', x:`
+        <p>Jay: <i>"it definitely needs to be full."</i> You: thumbnail, then the full image takes over the screen.</p>`},
+      {t:"Greg wants it in several places, report detail first -> e.g. an MRI report tied to a procedure", d:'9/25', s:'open', x:`
+        <p>From Jay, secondhand.</p>`}
+    ]},
+    {t:"Images inside an Orion question -> Jay's dev, moved to Tuesday 9/29, the 30th is the target", d:'9/25', s:'open', x:`
+      <p>Slipped from the 9/25 release. Kelly moved it to Tuesday; the Otter action item still says the 30th. Jay: providers may use it too.</p>`, kids:[
+      {t:"My add-button design sits under Provider — Patient -> check it against what Jay ships", d:'9/25', s:'open', x:`
+        <p>"Add picture / attach file in the chat box" (9/8, Next).</p>`}
+    ]},
+    {t:"Multi-agent handoff -> Jay's exit connect / exit add meds is the safety fix in prod; back burner, nobody's asking", d:'9/25', s:'pause', x:`
+      <p>Once in the Connect agent, "what's my A1C" gets "name your health system" again. Agents stay separate for token cost and premium gating. Jay: <i>"keep that as the back runner."</i></p>`, kids:[
+      {t:"Only if it's quick: make exit more visible", d:'9/25', s:'open', x:`
+        <p>Jay's only ask for now.</p>`},
+      {t:"My direction: agents stay silent, the patient switches topic freely; Kelly agrees", d:'9/25', s:'open', x:`
+        <p>Kelly: <i>"I would defer to the latter where they don't know."</i></p>`}
+    ]}
+  ]},
   {title:'Treatment Plan / Lifestyle Plan', accent:'var(--secondary)', src:'Born in Greg\u2019s pricing / product meeting 2026-08-24, reinterpreted in the caregiver review + team weekly 2026-08-25. Full extraction: C4P_TreatmentPlan_Requirements-Brief_v1.md. First pass due Tuesday with caregiver.', items:[
     {t:"Phase 0: write the metric contract -> one table, per category, what v1 shows and what it's compared to, this is my answer on evaluation", d:'9/9', s:'next', x:`
       <p>The artifact that replaces waiting for an answer on evaluation. Per category: the v1 metric, where the number comes from, and what it is compared against. Adherence % from the med log, seven-day averages from Apple Health / Health Connect for activity and sleep, then-vs-now on labs, patient-reported for symptoms, overdue / scheduled / done for screenings and vaccines.</p>
@@ -1123,7 +1150,33 @@ const DATA = [
       <p>Kelly: <i>"they might want two different plans. So we're going to have to think about what that looks like... I think this is fine for now, but we may need to be prepared to make it a multi-plan."</i> You agreed six categories won't carry a comprehensive plan forever, <i>"but let's start from here."</i></p>`},
     {t:"Show Greg the flow and the plan designs and get the approval so Jay can start", d:'9/15', s:'open', x:`
       <p>Kelly's closing push, and why the conditions work is urgent: <i>"we just need him to approve it so we can move forward with dev. Because last time he didn't approve it, right? He needed conditions. That's why I'm really focused on this condition piece."</i></p>
-      <p>Your plan was to review the user flow with him and show the wireframes only if he asks, since they're still low fidelity.</p>`}
+      <p>Your plan was to review the user flow with him and show the wireframes only if he asks, since they're still low fidelity.</p>`},
+    {t:"Update -> redraft, update reads like it changes my goals", d:'9/25', s:'open', x:`
+      <p>You: <i>"update ... will change my goals, or confuse if the data is not the latest."</i></p>`},
+    {t:"After the provider publishes, the plan locks -> no update button; reviewed by Dr. name, updated at your next visit", d:'9/25', s:'open', x:`
+      <p>Jay: once published <i>"it's locked."</i></p>`, kids:[
+      {t:"Kelly: if the provider can still change it, call it change or modify, and not the blue primary button", d:'9/25', s:'open', x:`
+        <p>She also asked how often a plan gets renewed or extended.</p>`}
+    ]},
+    {t:"Footer on the draft -> drafted by Orion, review with your provider", d:'9/25', s:'open', x:`
+      <p>You already redesigned this footer.</p>`},
+    {t:"Looks good only acknowledges -> say acknowledged by you", d:'9/25', s:'open', x:`
+      <p>Today it doesn't say who acknowledged it.</p>`},
+    {t:"Empty state for a category with no data -> hide it", d:'9/25', s:'open', x:`
+      <p>A provider-side tester had no adherence. Nutrition is missing for a different reason: no tracking source yet.</p>`},
+    {t:"Premium awareness during the 7-day trial -> Kelly says no notice feels bait-and-switch, I lean to tags only after they lose it", d:'9/25', s:'open', x:`
+      <p>Kelly: <i>"You tell us."</i> A disclosure, not the same thing as the 9/15 upsell hooks.</p>`, kids:[
+      {t:"Base patient whose plan goes away -> reuse the paywall card", d:'9/25', s:'open', x:`
+        <p>Kelly's Portu example.</p>`},
+      {t:"Go through the current screens first so premium chips don't land everywhere", d:'9/25', s:'open', x:`
+        <p>Your own caution.</p>`}
+    ]},
+    {t:"Plan update notification -> automatic or on every refresh, Kelly asked me to think about it", d:'9/25', s:'open', x:`
+      <p>Loose ask, no decision.</p>`},
+    {t:"Generate my own PTP and send Jay the bugs -> whole team, before the app store submit", d:'9/25', s:'open', x:`
+      <p>Android, med adherence especially. Tab ships as My prevention plan.</p>`},
+    {t:"Plan UI updates to Tuesday's design review -> quick call with Jay for anything small before the app store", d:'9/25', s:'open', x:`
+      <p>Jay wants small fixes before he submits.</p>`}
   ]},
   {title:'Prototype — Claude design', accent:'var(--secondary)', src:'Added 8/11.', items:[
     {t:'Build the mobile patient app in the Claude design prototype, from the Figma screens', d:'8/11', s:'open', x:`
@@ -1232,7 +1285,18 @@ const DATA = [
       <p>One constraint to design against: at most three columns per item type reach the dashboard. Medications carry drug, dose, status, last review and source in full data, but only name, dose and source come across.</p>
       <p class="files">orion-bulk-select-push-pin.html</p>`},
     {t:"Medication source selection in the provider UI -> Jay will do it after meds and goals, Kelly needs it for the demo", d:'9/11', s:'open', x:`
-      <p>Kelly asked for the timing because she demos around it: <i>"when might you update this for the source to select and push? Because it's a demo-specific thing, where update 17 meds is different from the UI that Yuehui pushed out most recently."</i> Jay deprioritised it because CareCloud has no medication write in the first place, and put it after the medication-and-goals build.</p>`}
+      <p>Kelly asked for the timing because she demos around it: <i>"when might you update this for the source to select and push? Because it's a demo-specific thing, where update 17 meds is different from the UI that Yuehui pushed out most recently."</i> Jay deprioritised it because CareCloud has no medication write in the first place, and put it after the medication-and-goals build.</p>`},
+    {t:"Detail screen for each item in the provider app -> the missing part, Jay has no detail components yet", d:'9/25', s:'open', x:`
+      <p>Same gap as the 9/4 detail-view line.</p>`},
+    {t:"Source label on documents Orion generates -> \"generated from FHIR / EMR data\" at the top, doctors don't read it as an original source", d:'9/25', s:'blocked', x:`
+      <p>Kelly's demo pushback. Jay's split: discrete EMR data, document-sourced, generated summary.</p>`, kids:[
+      {t:"Waiting on Kelly's example document", d:'9/25', s:'open', x:`
+        <p>Her Otter action item.</p>`},
+      {t:"Need the list of document types first -> a chip or tag behind the document name", d:'9/25', s:'open', x:`
+        <p>Your ask.</p>`}
+    ]},
+    {t:"Orion answers \"how do I add meds to my dashboard\" with the meds widget and an add button -> keep the CTA calm inside chat", d:'9/25', s:'open', x:`
+      <p>Kelly: <i>"a good idea."</i> Separate from your select-each-med UI.</p>`}
   ]},
   {title:'B2B — Healthcare Monitor (employer)', accent:'var(--success)', src:'C4P team weekly Tue 2026-09-15, 0:37–1:02. Greg\u2019s new ask — the aggregate employer view, for his Lisa meeting on 9/23. Full brief: C4P_MonitoringEmployerPlatform_Requirements-Brief_v1.md', items:[
     {t:"Quick mockup of the aggregate employer view -> Greg wants it for the Lisa meeting on 9/23, built off the Indiana employee network mock", d:'9/15', s:'open', x:`
@@ -1323,6 +1387,10 @@ const DATA = [
     {t:'Emphasize the health ID / C4P account that user can share with other people.... even maybe combined with the health hub', s:'open', x:`
       <p>The idea: the C4P account is itself a shareable health identity, and that might belong in the health hub rather than buried in profile settings.</p>
       <p class="files">share-health-data-mockup.html · share-data-v2-v3-compare.html · patient-consent-wireframes.html</p>`}
+  ]},
+  {title:'Design System & Knowledge Base', accent:'var(--primary)', src:'Team meeting Fri 2026-09-25.', items:[
+    {t:"Visual style guide for the AI knowledge base -> I own the product design folder, Tristen's branding stays under marketing", d:'9/25', s:'open', x:`
+      <p>Kelly's SharePoint restructure; the folder is yours to edit, no PHI.</p>`}
   ]}
 ];
 
