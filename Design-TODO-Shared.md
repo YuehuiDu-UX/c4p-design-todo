@@ -106,9 +106,6 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 ## Reports
 
-- Check Jay's add-on for Reports -> see what's actually live before designing on top of it (8/25) - **Next**
-  - Diagnostic report already carries every lab value on the panel, including the ones stats doesn't show (8/25)
-  - Reports tab is being hidden in the provider UI now the initial one is done -> confirm what that means for the patient side (8/25)
 - Radiology report is a quick fix and ugly -> needs a design pass (8/25)
 - Anatomy visual -> Orion generates a picture of what the radiology report describes, then the plan hangs off it (8/25)
 - Surface new and out-of-range labs on the reports tab -> review the tab first, I didn't design it (9/4) - **Next**
@@ -375,4 +372,4 @@ Brief: `C4P_MonitoringEmployerPlatform_Requirements-Brief_v1.md`
 
 ---
 
-_Generated 2026-09-28 15:06 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
+_Generated 2026-10-05 14:11 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
