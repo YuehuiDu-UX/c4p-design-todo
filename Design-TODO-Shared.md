@@ -108,18 +108,6 @@ Caregiver walkthrough went to Greg on 9/1 and he approved it. Caregiver moved to
 
 - Radiology report is a quick fix and ugly -> needs a design pass (8/25)
 - Anatomy visual -> Orion generates a picture of what the radiology report describes, then the plan hangs off it (8/25)
-- Surface new and out-of-range labs on the reports tab -> review the tab first, I didn't design it (9/4) - **Next**
-  - Settled 9/11: out of range on top, then new, then past -> no date-range rule and no other bucket (9/4, 9/11)
-  - Has to beat the patient portal -> "you've got a new test" is the one thing portals do well (9/4)
-  - No push for non-partner systems -> the indicator has to carry it without a notification (9/4)
-  - Jay is adding observations read-only into Review your records on every refresh (9/4)
-  - Map the EMR's "final" status to normal / abnormal in patient language (9/4)
-  - A report is a collection -> the lipid panel carries all its observations, an imaging study is one thing (9/4)
-  - Renamed 9/11: needs focus becomes out of range on the reports tab -> Jay: needs focus implies a time rule, out of range is just your current value (9/11)
-  - Out of range is driven off observation stats -> Jay pulls the diagnostic reports behind whatever is out of range there, no date logic in v1 (9/11)
-  - New means it arrived on a refresh -> a first sync is not new, everything else is past reports (9/11)
-  - Needs focus keeps the timing, the goal and the treatment plan, and stays with vitality (9/11)
-  - Report detail needs a provider-notes line for when we have doctor notes -> my notes is the patient's (9/11)
 - Plain-language label on clinical report names -> nobody searches "breast diagnostic bilateral with tomosynthesis", they type mammogram (9/4)
 - Rename needs focus to out of range across the whole Health Hub, not just the reports tab -> needs focus stays on the vitality score and on anything Orion specifically flags (9/15)
 - Jay reviews the Health Hub reports handoff before I show it to Greg (9/15)
@@ -372,4 +360,4 @@ Brief: `C4P_MonitoringEmployerPlatform_Requirements-Brief_v1.md`
 
 ---
 
-_Generated 2026-10-05 14:11 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
+_Generated 2026-10-09 14:10 from Design-TODO.md. Yuehui's file is the source of truth; edits made here won't flow back._
